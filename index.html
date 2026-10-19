@@ -184,6 +184,12 @@ body.brandmode .wrap{max-width:1400px}
 #brand .bck{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap}
 #brand .bacc{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 #brand #bmsg{min-height:1.2em;font-size:.9rem;margin:8px 0}
+#brand .bhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+#brand .bcard .btn.sec{background:linear-gradient(135deg,#ffffff 0%,#c4eed4 100%);color:#0b3d1f;border:1px solid #7fc79a;box-shadow:0 2px 6px rgba(0,0,0,.12);font-weight:600}
+#brand .bgrip{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;background:#eef6f0;border:1px solid #9bb5a3;border-radius:8px;padding:4px 8px;font-size:.8rem;color:#14231a;white-space:nowrap;flex:none}
+#brand .bgrip:active{cursor:grabbing}
+#brand .bcol.drop{outline:2px dashed #ffffff;outline-offset:-6px}
+
 
 body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,body.mlock #master #plist,body.mlock #master #ulist,body.mlock #master #tab-usr,body.mlock #master #tab-perf{display:none!important}
 .tabs{display:flex;gap:8px;margin:0 0 12px}
@@ -197,6 +203,13 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 .pchk{margin:4px 0 10px;padding:10px 12px;border:1px dashed var(--bdl);border-radius:10px;background:#ffffff}
 .pchk>b{display:block;color:var(--head);font-family:Montserrat,system-ui,sans-serif;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 #plist pre,#ulist pre{font-size:.78rem;max-height:none}
+#ulist .uwrap{width:100%;overflow-x:auto;border:1px solid #d6e6db;border-radius:12px;background:#fff;margin-top:8px}
+#ulist .utab{width:100%;min-width:620px;border-collapse:collapse;font-size:.9rem}
+#ulist .utab th{background:#0b3d1f;color:#e9fff1;text-align:left;padding:10px 12px;font-size:.78rem;letter-spacing:.06em;white-space:nowrap}
+#ulist .utab td{padding:10px 12px;border-top:1px solid #e3efe6;vertical-align:middle;color:#14231a}
+#ulist .utab tbody tr:nth-child(even) td{background:#f5faf7}
+#ulist .utab tbody tr:hover td{background:#e8f5ec}
+#ulist .utab td .btn{margin:0;padding:6px 12px;font-size:.82rem;white-space:nowrap}
 /* Aviso para instalar el acceso directo */
 #inst{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--panel);border:1px solid var(--bdl);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.45);padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;max-width:680px;margin:0 auto}
 #inst[hidden]{display:none}
@@ -368,12 +381,14 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <div class="kanhead">
 <button type="button" id="bback" class="btn sec">← Volver a TDE MASTER</button>
 <h2>TDE MASTER · BRANDING</h2>
+<button type="button" id="bref" class="btn sec">ACTUALIZAR</button>
 <p id="bmsg" role="status"></p>
 </div>
 <div class="bboard">
- <div class="bcol" style="--c:#f5c400"><h3>DATA INICIAL</h3>
-  <div id="bform" class="bcard" style="border-left-color:#f5c400">
-   <b>Nueva ficha de branding</b>
+ <div class="bcol" data-idx="0" style="--c:#38bdf8"><h3>ALTA TDE</h3>
+  <div id="bl0"></div>
+  <div id="bform" class="bcard" style="border-left-color:#38bdf8">
+   <b>Nueva TDE</b>
    <span class="bl">Logo (cualquier formato)</span><input type="file" id="bf_logo">
    <span class="bl">Foto</span><input type="file" id="bf_foto" accept="image/*">
    <span class="bl">Firma</span><input type="text" id="bf_firma">
@@ -381,14 +396,18 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
    <span class="bl">Cargo</span><input type="text" id="bf_cargo">
    <span class="bl">Número de teléfono</span><input type="text" id="bf_tel" inputmode="tel">
    <span class="bl">Mail</span><input type="email" id="bf_mail">
-   <span class="bl">Ubicación</span><input type="text" id="bf_ubic">
-   <span class="bl">Web</span><input type="text" id="bf_web">
-   <button type="button" id="bf_save" class="btn">Guardar ficha</button>
+   <span class="bl">Domicilio</span><input type="text" id="bf_domicilio">
+   <span class="bl">Número</span><input type="text" id="bf_numero" inputmode="numeric">
+   <span class="bl">Localidad</span><input type="text" id="bf_localidad">
+   <span class="bl">Provincia</span><input type="text" id="bf_provincia">
+   <span class="bl">País</span><input type="text" id="bf_pais">
+   <span class="bl">Web (opcional)</span><input type="text" id="bf_web">
+   <button type="button" id="bf_save" class="btn">GUARDAR TDE</button>
   </div>
-  <div id="bl0"></div>
  </div>
- <div class="bcol" style="--c:#e53935"><h3>DESARROLLO</h3><div id="bl1"></div></div>
- <div class="bcol" style="--c:#2ecc71"><h3>FINALIZADO</h3><div id="bl2"></div></div>
+ <div class="bcol" data-idx="1" style="--c:#f5c400"><h3>DATA INICIAL</h3><div id="bl1"></div></div>
+ <div class="bcol" data-idx="2" style="--c:#e53935"><h3>DESARROLLO</h3><div id="bl2"></div></div>
+ <div class="bcol" data-idx="3" style="--c:#2ecc71"><h3>FINALIZADO</h3><div id="bl3"></div></div>
 </div>
 </section>
 <section id="master">
@@ -431,6 +450,8 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <label>Firma<input type="text" id="ufirma" placeholder="Se completa con la firma del perfil"></label>
 <label>Usuario<input type="text" id="uusr" autocomplete="off"></label>
 <label>Clave<input type="password" id="uclave" autocomplete="new-password"></label>
+<label>Nombre<input type="text" id="unombre" autocomplete="off"></label>
+<label>Apellido<input type="text" id="uapellido" autocomplete="off"></label>
 <button type="button" id="ucrear" class="btn">Crear usuario</button>
 </div>
 <div id="ulist"></div>
@@ -1040,30 +1061,37 @@ function loadUsuarios(){
  var box=$("ulist");box.innerHTML="";
  if(!esMaster()){var n=document.createElement("p");n.className="note";n.textContent="Solo el perfil MASTER ve los usuarios.";box.appendChild(n);return Promise.resolve()}
  return rpc("listar_usuarios",{p_token:tok()}).then(function(list){
-  list=list||[];box.innerHTML="";
-  if(!list.length){var p=document.createElement("p");p.className="note";p.textContent="Todavía no hay usuarios creados.";box.appendChild(p)}
-  list.forEach(function(x){
-   var d=document.createElement("div");d.className="item";
-   var b=document.createElement("b");b.textContent=x.usuario;
-   var s=document.createElement("small");s.textContent="Perfil: "+(x.perfil_nombre||"—")+" · Firma: "+(x.firma||"—");
-   d.appendChild(b);d.appendChild(s);
-   var acc=document.createElement("div");acc.style.cssText="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px";
-   acc.appendChild(btn("Modificar","sec",function(){editarUsuario(x)}));
-   if(x.usuario!=="MRTech")acc.appendChild(btn("Eliminar","danger",function(){delUsuario(x.id)}));
-   d.appendChild(acc);
-   box.appendChild(d);
+  list=(list||[]).slice().sort(function(a,b){
+   return (a.perfil_nombre||"").localeCompare(b.perfil_nombre||"","es")||(a.apellido||"").localeCompare(b.apellido||"","es")||(a.nombre||"").localeCompare(b.nombre||"","es")||(a.usuario||"").localeCompare(b.usuario||"","es");
   });
+  box.innerHTML="";
+  if(!list.length){var p=document.createElement("p");p.className="note";p.textContent="Todavía no hay usuarios creados.";box.appendChild(p);return}
+  var wrap=document.createElement("div");wrap.className="uwrap";
+  var t=document.createElement("table");t.className="utab";
+  var hd=document.createElement("thead"),hr=document.createElement("tr");
+  ["PERFIL","FIRMA","NOMBRE","APELLIDO","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===4)th.colSpan=2;hr.appendChild(th)});
+  hd.appendChild(hr);t.appendChild(hd);
+  var tb=document.createElement("tbody");
+  list.forEach(function(x){
+   var tr=document.createElement("tr");
+   [x.perfil_nombre,x.firma,x.nombre,x.apellido].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
+   var t1=document.createElement("td");t1.appendChild(btn("Modificar","sec",function(){editarUsuario(x)}));tr.appendChild(t1);
+   var t2=document.createElement("td");if(x.usuario!=="MRTech")t2.appendChild(btn("Eliminar","danger",function(){delUsuario(x.id)}));tr.appendChild(t2);
+   tb.appendChild(tr);
+  });
+  t.appendChild(tb);wrap.appendChild(t);box.appendChild(wrap);
  }).catch(function(e){mset("No se pudo leer los usuarios: "+errTxt(e))});
 }
 function crearUsuario(){
  if(!esMaster()){mset("Solo el perfil MASTER puede crear usuarios.");return}
- var p=perfilSel(),usr=$("uusr").value.trim(),clave=$("uclave").value;
+ var p=perfilSel(),usr=$("uusr").value.trim(),clave=$("uclave").value,nom=$("unombre").value.trim(),ape=$("uapellido").value.trim();
  if(!p){mset("Elegí un perfil.");return}
+ if(!nom||!ape){mset("Escribí nombre y apellido.");return}
  if(!usr){mset("Escribí el usuario.");return}
  if(clave.length<6){mset("La clave debe tener al menos 6 caracteres.");return}
  mset("Creando usuario…");
- rpc("crear_usuario",{p_token:tok(),p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave})
-  .then(function(){$("uusr").value="";$("uclave").value="";mset("Usuario creado.");return loadUsuarios()})
+ rpc("crear_usuario",{p_token:tok(),p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave,p_nombre:nom,p_apellido:ape})
+  .then(function(){$("uusr").value="";$("uclave").value="";$("unombre").value="";$("uapellido").value="";mset("Usuario creado.");return loadUsuarios()})
   .catch(function(e){mset("No se pudo crear el usuario: "+errTxt(e))});
 }
 var editId=null;
@@ -1071,6 +1099,7 @@ function editarUsuario(x){
  editId=x.id;
  for(var i=0;i<PERFILES.length;i++){if(PERFILES[i].nombre===x.perfil_nombre){$("uperfil").value=PERFILES[i].id}}
  $("ufirma").value=x.firma||"";$("uusr").value=x.usuario;$("uclave").value="";
+ $("unombre").value=x.nombre||"";$("uapellido").value=x.apellido||"";
  $("uclave").placeholder="Dejar vacía para no cambiarla";
  $("ucrear").textContent="Guardar cambios";
  mset("Modificando "+x.usuario+". Cambiá los datos y tocá Guardar cambios.");
@@ -1079,6 +1108,7 @@ function editarUsuario(x){
 function cancelarEdit(){
  editId=null;$("ucrear").textContent="Crear usuario";
  $("uusr").value="";$("uclave").value="";$("uclave").placeholder="";$("ufirma").value="";
+ $("unombre").value="";$("uapellido").value="";
 }
 function modificarUsuario(){
  var p=perfilSel(),usr=$("uusr").value.trim(),clave=$("uclave").value;
@@ -1086,7 +1116,7 @@ function modificarUsuario(){
  if(!usr){mset("Escribí el usuario.");return}
  if(clave&&clave.length<6){mset("La clave debe tener al menos 6 caracteres.");return}
  mset("Guardando cambios…");
- rpc("modificar_usuario",{p_token:tok(),p_id:editId,p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave||null})
+ rpc("modificar_usuario",{p_token:tok(),p_id:editId,p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave||null,p_nombre:$("unombre").value.trim(),p_apellido:$("uapellido").value.trim()})
   .then(function(){cancelarEdit();mset("Usuario modificado.");return loadUsuarios()})
   .catch(function(e){mset("No se pudo modificar: "+errTxt(e))});
 }
@@ -1100,102 +1130,183 @@ function delUsuario(id){
 // ---- Eventos ----
 $("tmaster").onclick=openMaster;
 
-// ---- BRANDING: DATA INICIAL → DESARROLLO → FINALIZADO ----
-var BSTAGES=["DATA INICIAL","DESARROLLO","FINALIZADO"],BCOLOR=["#f5c400","#e53935","#2ecc71"],BWA="5492616576239",BNUM="+5492616576239",bRecs=[];
+// ---- BRANDING: ALTA TDE → DATA INICIAL → DESARROLLO → FINALIZADO ----
+var BSTAGES=["ALTA TDE","DATA INICIAL","DESARROLLO","FINALIZADO"],BCOLOR=["#38bdf8","#f5c400","#e53935","#2ecc71"],BWA="5492616576239",BNUM="+5492616576239",bRecs=[];
 function bMsg(t,err){var m=$("bmsg");m.textContent=t||"";m.style.color=err?"#ff6b6b":""}
 function bFecha(s){try{return new Date(s).toLocaleString("es-AR")}catch(e){return s}}
 function bSafe(n){return String(n).replace(/[^\w.\-]+/g,"_")}
-function bWa(msg){window.open("https://wa.me/"+BWA+"?text="+encodeURIComponent(msg),"_blank")}
+function bWa(msg,num){window.open("https://wa.me/"+(num||BWA)+"?text="+encodeURIComponent(msg),"_blank")}
 function bSave(r){return rpc("guardar_branding",{p_token:tok(),p_id:r.id,p_estado:r.estado,p_datos:r.datos||{},p_archivos:r.archivos||{},p_checklist:r.checklist||{}})}
 function bFail(e){bMsg("No se pudo guardar: "+errTxt(e),true)}
 function bLoad(){
  bMsg("Cargando branding…");
  return rpc("listar_branding",{p_token:tok()}).then(function(list){
   bRecs=list||[];bPaint();
-  bMsg(bRecs.length?bRecs.length+(bRecs.length===1?" branding en el tablero":" branding en el tablero"):"Todavía no hay branding cargado.");
+  bMsg(bRecs.length?bRecs.length+" TDE en BRANDING":"Todavía no hay TDE en BRANDING.");
  }).catch(function(e){bMsg("No se pudo cargar: "+errTxt(e),true)});
 }
 function bPaint(){
- for(var i=0;i<3;i++){
-  var box=$("bl"+i);box.innerHTML="";
-  bRecs.forEach(function(r){if(r.estado===BSTAGES[i])box.appendChild(bCard(r,i))});
+ for(var s=0;s<4;s++){
+  var box=$("bl"+s);box.innerHTML="";
+  bRecs.forEach(function(r){if(r.estado===BSTAGES[s])box.appendChild(bCard(r,s))});
  }
 }
-function bLinea(t){var s=document.createElement("span");s.className="bl";s.textContent=t;return s}
+function bLinea(t){var x=document.createElement("span");x.className="bl";x.textContent=t;return x}
 function bInput(val,ph){var x=document.createElement("input");x.type="text";x.value=val||"";x.placeholder=ph||"";return x}
-function bCheck(r,key,texto,msg,habil,ayuda){
+function bCheck(r,key,texto,msg,habil,ayuda,num){
  var box=document.createElement("div");box.className="bck";
  var cb=document.createElement("input");cb.type="checkbox";cb.disabled=true;cb.checked=!!(r.checklist&&r.checklist[key]);
  var lab=document.createElement("span");lab.textContent=texto;
  box.appendChild(cb);box.appendChild(lab);
  if(!cb.checked){
-  var b=btn("Notificar a "+BNUM,"sec",function(){
-   bWa(msg);
+  var b=btn("Notificar a "+(num?"+"+num:BNUM),"sec",function(){
+   bWa(msg,num);
    r.checklist=Object.assign({},r.checklist||{});r.checklist[key]=true;
    bSave(r).then(bLoad).catch(bFail);
   });
   b.disabled=!habil;box.appendChild(b);
-  if(!habil&&ayuda){var h=bLinea(ayuda);box.appendChild(h)}
+  if(!habil&&ayuda)box.appendChild(bLinea(ayuda));
  }
  return box;
 }
-function bCard(r,i){
- var d=document.createElement("div");d.className="bcard";d.style.borderLeftColor=BCOLOR[i];
- var h=document.createElement("b");h.textContent="Ingresado el "+bFecha(r.creado_en);d.appendChild(h);
+function bNotifFinal(r,num,msg){
+ bWa(msg,num);
+ r.checklist=Object.assign({},r.checklist||{});r.checklist.final=true;
+ bSave(r).then(bLoad).catch(bFail);
+}
+function bAdjunto(r,k,etiqueta,accept){
+ var box=document.createElement("div");box.className="bck";
+ var A=r.archivos||{};
+ box.appendChild(bLinea(etiqueta+(A[k]?" — cargado: "+A[k].nombre:" — pendiente")));
+ var fi=document.createElement("input");fi.type="file";fi.accept=accept;
+ fi.onchange=function(){
+  var f=fi.files[0];if(!f)return;
+  var path="branding/"+r.id+"/marca/"+bSafe(f.name);
+  bMsg("Subiendo "+f.name+"…");
+  uploadFile(path,f).then(function(){
+   var na=Object.assign({},r.archivos||{});na[k]={nombre:f.name,ruta:path};r.archivos=na;
+   return bSave(r);
+  }).then(bLoad).catch(bFail);
+ };
+ box.appendChild(fi);
+ return box;
+}
+function bCard(r,s){
+ var d=document.createElement("div");d.className="bcard";d.style.borderLeftColor=BCOLOR[s];
+ var head=document.createElement("div");head.className="bhead";
+ var h=document.createElement("b");h.textContent=s===3?"TDE FINALIZADO !!!!!":"Ingresado el "+bFecha(r.creado_en);
+ var g=document.createElement("span");g.className="bgrip";g.textContent="⠿ Mover";g.title="Arrastrá la TDE a otro estado";
+ g.addEventListener("pointerdown",function(e){bDragStart(e,r,d,s)});
+ head.appendChild(h);head.appendChild(g);d.appendChild(head);
  var D=r.datos||{},A=r.archivos||{};
- if(i===0){
-  [["Firma","firma"],["Nombre y Apellido","nombre"],["Cargo","cargo"],["Número de teléfono","telefono"],["Mail","mail"],["Ubicación","ubicacion"],["Web","web"]].forEach(function(p){
+ if(s<=1){
+  [["Firma","firma"],["Nombre y Apellido","nombre"],["Cargo","cargo"],["Número de teléfono","telefono"],["Mail","mail"],["Domicilio","domicilio"],["Número","numero"],["Localidad","localidad"],["Provincia","provincia"],["País","pais"],["Web","web"]].forEach(function(p){
    d.appendChild(bLinea(p[0]+": "+(D[p[1]]||"—")))});
   d.appendChild(bLinea("Logo: "+(A.logo?A.logo.nombre:"—")+" · Foto: "+(A.foto?A.foto.nombre:"—")));
  }
- if(i===1){
-  var inps={};
+ if(s===1)d.appendChild(bCheck(r,"data","Check list: BRANDING DATA INICIAL LISTO","BRANDING DATA INICIAL LISTO",true,""));
+ if(s===2){
   [["Firma","firma"],["Nombre y Apellido","nombre"],["Cargo","cargo"]].forEach(function(p){
-   d.appendChild(bLinea(p[0]));inps[p[1]]=bInput(D[p[1]],p[0]);d.appendChild(inps[p[1]])});
-  d.appendChild(btn("Guardar datos","sec",function(){
-   r.datos=Object.assign({},D,{firma:inps.firma.value.trim(),nombre:inps.nombre.value.trim(),cargo:inps.cargo.value.trim()});
-   bSave(r).then(bLoad).catch(bFail);
-  }));
+   d.appendChild(bLinea(p[0]+": "+(D[p[1]]||"—")))});
+  var acc=document.createElement("div");acc.className="bacc";
+  acc.appendChild(btn("Descargar Branding FULL","sec",function(){bZip(r)}));
+  d.appendChild(acc);
+  d.appendChild(bAdjunto(r,"marca_pptx","POWER POINT TDE MASTER",".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"));
+  d.appendChild(bAdjunto(r,"marca_pdf","PDF MASTER",".pdf,application/pdf"));
+  d.appendChild(bCheck(r,"desarrollo","Check list: BRANDING DESARROLLO LISTO","BRANDING DESARROLLO LISTO",!!(D.firma&&D.nombre&&D.cargo&&A.marca_pptx&&A.marca_pdf),"Adjuntá POWER POINT y PDF para notificar.","5492616518318"));
+  return d;
  }
- if(i===2){
-  [["marca_pptx","PowerPoint (.pptx)",".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"],["marca_pdf","PDF (.pdf)",".pdf,application/pdf"]].forEach(function(p){
-   d.appendChild(bLinea("BRANDING DE MARCA · "+p[1]+(A[p[0]]?" — cargado: "+A[p[0]].nombre:"")));
-   var fi=document.createElement("input");fi.type="file";fi.accept=p[2];
-   fi.onchange=function(){
-    var f=fi.files[0];if(!f)return;
-    var path="branding/"+r.id+"/marca/"+bSafe(f.name);
-    bMsg("Subiendo "+f.name+"…");
-    uploadFile(path,f).then(function(){
-     var na=Object.assign({},r.archivos||{});na[p[0]]={nombre:f.name,ruta:path};r.archivos=na;
-     return bSave(r);
-    }).then(bLoad).catch(bFail);
-   };
-   d.appendChild(fi);
-  });
+ if(s===3){
+  d.appendChild(bLinea("POWER POINT TDE MASTER: "+(A.marca_pptx?A.marca_pptx.nombre:"—")));
+  d.appendChild(bLinea("PDF MASTER: "+(A.marca_pdf?A.marca_pdf.nombre:"—")));
+  var fMsg="TDE ("+(D.firma||"")+", "+(D.nombre||"")+") FINALIZADO !!!!!";
+  var fHab=!!(A.marca_pptx||A.marca_pdf);
+  var fck=document.createElement("div");fck.className="bck";
+  var fcb=document.createElement("input");fcb.type="checkbox";fcb.disabled=true;fcb.checked=!!(r.checklist&&r.checklist.final);
+  var fl=document.createElement("span");fl.textContent="Check list: TDE FINALIZADO";
+  fck.appendChild(fcb);fck.appendChild(fl);
+  if(!fcb.checked){
+   fck.appendChild(btn("Notificar a MR +5492616518318","sec",function(){bNotifFinal(r,"5492616518318",fMsg)}));
+   fck.appendChild(btn("Notificar a Nicolás +5492616576239","sec",function(){bNotifFinal(r,"5492616576239",fMsg)}));
+   fck.querySelectorAll("button").forEach(function(b){b.disabled=!fHab});
+   if(!fHab)fck.appendChild(bLinea("Falta el archivo de la TDE."));
+  }
+  d.appendChild(fck);
  }
- var files=A;
- if(i===0)d.appendChild(bCheck(r,"data","Check list: BRANDING DATA INICIAL LISTO","BRANDING DATA INICIAL LISTO",true,""));
- if(i===1)d.appendChild(bCheck(r,"desarrollo","Check list: BRANDING DESARROLLO LISTO","BRANDING DESARROLLO LISTO",!!(D.firma&&D.nombre&&D.cargo),"Completá firma, nombre y cargo para notificar."));
- if(i===2)d.appendChild(bCheck(r,"final","Check list: BRANDING FINALIZADO","BRANDING FINALIZADO",!!(files.marca_pptx||files.marca_pdf),"Subí al menos un formato (PowerPoint o PDF)."));
- var acc=document.createElement("div");acc.className="bacc";
- acc.appendChild(btn("Descargar Branding FULL","sec",function(){bZip(r)}));
- if(i<2){
-  var key=i===0?"data":"desarrollo";
-  var ok=!!(r.checklist&&r.checklist[key]);
-  var mv=btn("Pasar a "+BSTAGES[i+1],"",function(){
-   r.estado=BSTAGES[i+1];bSave(r).then(bLoad).catch(bFail);
-  });
-  mv.disabled=!ok;acc.appendChild(mv);
- }
- d.appendChild(acc);
+ var acc2=document.createElement("div");acc2.className="bacc";
+ if(s===3)acc2.appendChild(btn("Descargar FULL FINAL","sec",function(){bZip(r,true)}));
+ else acc2.appendChild(btn("Descargar Branding FULL","sec",function(){bZip(r)}));
+ if(s===3)acc2.appendChild(btn("Eliminar","danger",function(){bEliminar(r)}));
+ d.appendChild(acc2);
  return d;
+}
+// Arrastre con mouse o dedo: la TDE sigue al puntero y se suelta en la columna destino
+function bDragStart(e,r,card,s){
+ e.preventDefault();
+ var rect=card.getBoundingClientRect();
+ var ghost=card.cloneNode(true);
+ ghost.style.cssText="position:fixed;left:"+rect.left+"px;top:"+rect.top+"px;width:"+rect.width+"px;opacity:.9;pointer-events:none;z-index:9999;box-shadow:0 12px 30px rgba(0,0,0,.5)";
+ document.body.appendChild(ghost);
+ var ox=e.clientX-rect.left,oy=e.clientY-rect.top,target=s;
+ var cols=document.querySelectorAll("#brand .bcol");
+ function colAt(x,y){
+  var el=document.elementFromPoint(x,y);
+  var c=el&&el.closest?el.closest("#brand .bcol"):null;
+  return c?Number(c.getAttribute("data-idx")):-1;
+ }
+ function mv(ev){
+  ghost.style.left=(ev.clientX-ox)+"px";ghost.style.top=(ev.clientY-oy)+"px";
+  var c=colAt(ev.clientX,ev.clientY);target=c;
+  for(var k=0;k<cols.length;k++){cols[k].classList.toggle("drop",Number(cols[k].getAttribute("data-idx"))===c)}
+ }
+ function fin(ev){
+  document.removeEventListener("pointermove",mv);
+  document.removeEventListener("pointerup",fin);
+  document.removeEventListener("pointercancel",fin);
+  ghost.remove();
+  for(var k=0;k<cols.length;k++){cols[k].classList.remove("drop")}
+  if(ev.type==="pointerup"&&target>=0&&target!==s)bMover(r,s,target);
+ }
+ document.addEventListener("pointermove",mv);
+ document.addEventListener("pointerup",fin);
+ document.addEventListener("pointercancel",fin);
+}
+function bMover(r,de,a){
+ for(var k=de;k<a;k++){
+  if(k===1&&!(r.checklist&&r.checklist.data)){bMsg("Para pasar a DESARROLLO primero completá el check list BRANDING DATA INICIAL LISTO.",true);return}
+  if(k===2&&!(r.checklist&&r.checklist.desarrollo)){bMsg("Para pasar a FINALIZADO primero completá el check list BRANDING DESARROLLO LISTO.",true);return}
+ }
+ r.estado=BSTAGES[a];
+ bMsg("Moviendo a "+BSTAGES[a]+"…");
+ bSave(r).then(bLoad).catch(bFail);
+}
+// Notificación flotante con Continuar / Rechazar
+function uiConfirmar(texto,onOk){
+ var prev=document.getElementById("cfm");if(prev)prev.remove();
+ var box=document.createElement("div");box.id="cfm";box.setAttribute("role","alertdialog");
+ box.style.cssText="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;background:#0b1f14;color:#eaf7ee;border:1px solid #2ecc71;border-radius:14px;padding:16px 18px;box-shadow:0 10px 30px rgba(0,0,0,.45);width:min(420px,92vw);box-sizing:border-box;font-size:.95rem";
+ var p=document.createElement("p");p.style.cssText="margin:0 0 14px;line-height:1.4";p.textContent=texto;
+ var row=document.createElement("div");row.style.cssText="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap";
+ row.appendChild(btn("Rechazar","sec",function(){box.remove()}));
+ row.appendChild(btn("Continuar","danger",function(){box.remove();onOk()}));
+ box.appendChild(p);box.appendChild(row);document.body.appendChild(box);
+}
+function bEliminar(r){
+ uiConfirmar("La ELIMINACIÓN TDE impacta en la app y base de datos.",function(){
+  var paths=[];Object.keys(r.archivos||{}).forEach(function(k){var x=r.archivos[k];if(x&&x.ruta)paths.push(x.ruta)});
+  bMsg("Eliminando…");
+  rpc("eliminar_branding",{p_token:tok(),p_id:r.id})
+   .then(function(){return removeFiles(paths).catch(function(){})})
+   .then(function(){bMsg("TDE eliminada de BRANDING.");return bLoad()})
+   .catch(bFail);
+ });
 }
 function bGuardarFicha(){
  var v=function(id){return $(id).value.trim()};
- var datos={firma:v("bf_firma"),nombre:v("bf_nombre"),cargo:v("bf_cargo"),telefono:v("bf_tel"),mail:v("bf_mail"),ubicacion:v("bf_ubic"),web:v("bf_web")};
+ var datos={firma:v("bf_firma"),nombre:v("bf_nombre"),cargo:v("bf_cargo"),telefono:v("bf_tel"),mail:v("bf_mail"),domicilio:v("bf_domicilio"),numero:v("bf_numero"),localidad:v("bf_localidad"),provincia:v("bf_provincia"),pais:v("bf_pais"),web:v("bf_web")};
  if(!datos.nombre||!datos.telefono){bMsg("Completá al menos Nombre y Apellido y Número de teléfono.",true);return}
  var logo=$("bf_logo").files[0],foto=$("bf_foto").files[0];
- bMsg("Guardando ficha…");
+ bMsg("Guardando TDE…");
  var rec={id:null,estado:"DATA INICIAL",datos:datos,archivos:{},checklist:{}};
  rpc("guardar_branding",{p_token:tok(),p_id:null,p_estado:"DATA INICIAL",p_datos:datos,p_archivos:{},p_checklist:{}})
   .then(function(id){
@@ -1205,29 +1316,30 @@ function bGuardarFicha(){
    return Promise.all(jobs).then(function(){return bSave(rec)});
   })
   .then(function(){
-   ["bf_firma","bf_nombre","bf_cargo","bf_tel","bf_mail","bf_ubic","bf_web"].forEach(function(k){$(k).value=""});
+   ["bf_firma","bf_nombre","bf_cargo","bf_tel","bf_mail","bf_domicilio","bf_numero","bf_localidad","bf_provincia","bf_pais","bf_web"].forEach(function(k){$(k).value=""});
    $("bf_logo").value="";$("bf_foto").value="";
-   bMsg("Ficha guardada en DATA INICIAL.");
+   bMsg("TDE guardada en DATA INICIAL.");
    return bLoad();
   })
-  .catch(function(e){bMsg("No se pudo guardar la ficha: "+errTxt(e),true)});
+  .catch(function(e){bMsg("No se pudo guardar la TDE: "+errTxt(e),true)});
 }
-function bZip(r){
+function bZip(r,final){
  if(typeof JSZip==="undefined"){bMsg("No se cargó el generador de ZIP. Revisá la conexión.",true);return}
  var zip=new JSZip(),D=r.datos||{},A=r.archivos||{};
- var ficha=["BRANDING · "+r.estado,"Ingresado el "+bFecha(r.creado_en),"","Firma: "+(D.firma||""),"Nombre y Apellido: "+(D.nombre||""),"Cargo: "+(D.cargo||""),"Número de teléfono: "+(D.telefono||""),"Mail: "+(D.mail||""),"Ubicación: "+(D.ubicacion||""),"Web: "+(D.web||"")].join("\n");
+ var ficha=["BRANDING · "+r.estado,"Ingresado el "+bFecha(r.creado_en),"","Firma: "+(D.firma||""),"Nombre y Apellido: "+(D.nombre||""),"Cargo: "+(D.cargo||""),"Número de teléfono: "+(D.telefono||""),"Mail: "+(D.mail||""),"Domicilio: "+(D.domicilio||""),"Número: "+(D.numero||""),"Localidad: "+(D.localidad||""),"Provincia: "+(D.provincia||""),"País: "+(D.pais||""),"Web: "+(D.web||"")].join("\n");
  zip.file("ficha.txt",ficha);
  zip.file("branding.json",JSON.stringify({id:r.id,estado:r.estado,creado_en:r.creado_en,datos:D,checklist:r.checklist||{}},null,2));
  var jobs=[];
  Object.keys(A).forEach(function(k){
   var x=A[k];if(!x||!x.ruta)return;
+  if(final&&k!=="marca_pptx"&&k!=="marca_pdf")return;
   var carpeta=k==="logo"?"logo/":(k==="foto"?"foto/":"marca/");
   jobs.push(downloadFile(x.ruta).then(function(b){zip.file(carpeta+x.nombre,b)}));
  });
  bMsg("Preparando ZIP…");
  Promise.all(jobs).then(function(){return zip.generateAsync({type:"blob"})}).then(function(blob){
   var stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
-  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="Branding_FULL_"+slug(D.nombre||r.id)+"_"+stamp+".zip";
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=(final?"Branding_FULL_FINAL_":"Branding_FULL_")+slug(D.nombre||r.id)+"_"+stamp+".zip";
   document.body.appendChild(a);a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500);
   bMsg("ZIP descargado.");
@@ -1241,6 +1353,7 @@ function openBrand(){
 $("tbrand").addEventListener("click",openBrand);
 $("bback").onclick=function(){document.body.classList.remove("brandmode");openMaster()};
 $("bf_save").onclick=bGuardarFicha;
+$("bref").onclick=function(){bLoad()};
 
 // ---- CIBERSEGURIDAD: ingreso a TDE MASTER con 3 intentos y bloqueo creciente ----
 var cyTimer=null,cyAt=0,cyUltimo=null;

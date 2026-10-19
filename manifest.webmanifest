@@ -1,0 +1,16 @@
+{
+  "name": "TDE Multisistema",
+  "short_name": "TDE",
+  "description": "Tarjeta Digital Empresarial · Multisistema · MR Technology",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020705",
+  "theme_color": "#052a12",
+  "lang": "es-AR",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
