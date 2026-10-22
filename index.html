@@ -185,7 +185,10 @@ body.brandmode .wrap{max-width:1400px}
 #brand .bacc{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
 #brand #bmsg{min-height:1.2em;font-size:.9rem;margin:8px 0}
 #brand .bhead{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-#brand .bcard .btn.sec{background:linear-gradient(135deg,#ffffff 0%,#c4eed4 100%);color:#0b3d1f;border:1px solid #7fc79a;box-shadow:0 2px 6px rgba(0,0,0,.12);font-weight:600}
+#brand .bcard .btn.sec{background:linear-gradient(135deg,#ffffff 0%,var(--c) 100%);color:#0b1f14;border:1px solid var(--c);box-shadow:0 2px 6px rgba(0,0,0,.12);font-weight:700}
+#brand .bdat{display:block;font-size:14px;font-weight:700;color:#14231a;margin-top:4px}
+#brand .bidin{font-weight:700;font-size:14px;color:#0b1f14;background:linear-gradient(135deg,#ffffff 0%,var(--c) 100%);border:1px solid var(--c);border-radius:6px;padding:6px 8px;box-sizing:border-box;width:100%;max-width:160px}
+#brand .bfin{background:#0b1f14;color:#39ff14;padding:4px 8px;border-radius:6px;text-shadow:0 0 6px rgba(57,255,20,.7);letter-spacing:.04em}
 #brand .bgrip{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;background:#eef6f0;border:1px solid #9bb5a3;border-radius:8px;padding:4px 8px;font-size:.8rem;color:#14231a;white-space:nowrap;flex:none}
 #brand .bgrip:active{cursor:grabbing}
 #brand .bcol.drop{outline:2px dashed #ffffff;outline-offset:-6px}
@@ -1131,12 +1134,12 @@ function delUsuario(id){
 $("tmaster").onclick=openMaster;
 
 // ---- BRANDING: ALTA TDE → DATA INICIAL → DESARROLLO → FINALIZADO ----
-var BSTAGES=["ALTA TDE","DATA INICIAL","DESARROLLO","FINALIZADO"],BCOLOR=["#38bdf8","#f5c400","#e53935","#2ecc71"],BWA="5492616576239",BNUM="+5492616576239",bRecs=[];
+var BSTAGES=["ALTA TDE","DATA INICIAL","DESARROLLO","FINALIZADO"],BCOLOR=["#38bdf8","#f5c400","#e53935","#2ecc71"],BWA="5492616576239",BNUM="+5492616576239",bRecs=[],bEditing={};
 function bMsg(t,err){var m=$("bmsg");m.textContent=t||"";m.style.color=err?"#ff6b6b":""}
 function bFecha(s){try{return new Date(s).toLocaleString("es-AR")}catch(e){return s}}
 function bSafe(n){return String(n).replace(/[^\w.\-]+/g,"_")}
 function bWa(msg,num){window.open("https://wa.me/"+(num||BWA)+"?text="+encodeURIComponent(msg),"_blank")}
-function bSave(r){return rpc("guardar_branding",{p_token:tok(),p_id:r.id,p_estado:r.estado,p_datos:r.datos||{},p_archivos:r.archivos||{},p_checklist:r.checklist||{}})}
+function bSave(r){return rpc("guardar_branding",{p_token:tok(),p_id:r.id,p_estado:r.estado,p_datos:r.datos||{},p_archivos:r.archivos||{},p_checklist:r.checklist||{},p_tarjeta_id:r.tarjeta_id||null})}
 function bFail(e){bMsg("No se pudo guardar: "+errTxt(e),true)}
 function bLoad(){
  bMsg("Cargando branding…");
@@ -1169,9 +1172,24 @@ function bCheck(r,key,texto,msg,habil,ayuda,num){
  }
  return box;
 }
+function bModificar(r){bEditing[r.id]=true;bPaint()}
 function bNotifFinal(r,num,msg){
  bWa(msg,num);
  r.checklist=Object.assign({},r.checklist||{});r.checklist.final=true;
+ var D=r.datos||{};
+ var jobs=[bSave(r)];
+ bRecs.forEach(function(x){
+  if(x.id===r.id||x.estado===BSTAGES[3]||!x.datos)return;
+  if((x.datos.nombre||"")===(D.nombre||"")&&(x.datos.firma||"")===(D.firma||"")){
+   x.estado=BSTAGES[3];jobs.push(bSave(x));
+  }
+ });
+ Promise.all(jobs).then(bLoad).catch(bFail);
+}
+function bRegresar(r){
+ r.estado=BSTAGES[2];
+ r.checklist=Object.assign({},r.checklist||{});r.checklist.final=false;
+ bMsg("Regresando a DESARROLLO…");
  bSave(r).then(bLoad).catch(bFail);
 }
 function bAdjunto(r,k,etiqueta,accept){
@@ -1191,10 +1209,14 @@ function bAdjunto(r,k,etiqueta,accept){
  box.appendChild(fi);
  return box;
 }
+function bDato(t){var x=document.createElement("span");x.className="bdat";x.textContent=t;return x}
 function bCard(r,s){
  var d=document.createElement("div");d.className="bcard";d.style.borderLeftColor=BCOLOR[s];
+ var fin=!!(r.checklist&&r.checklist.final);
  var head=document.createElement("div");head.className="bhead";
- var h=document.createElement("b");h.textContent=s===3?"TDE FINALIZADO !!!!!":"Ingresado el "+bFecha(r.creado_en);
+ var h=document.createElement("b");
+ if(s===3&&fin){h.className="bfin";h.textContent="TDE FINALIZADO !!!!!"}
+ else h.textContent="Ingresado el "+bFecha(r.creado_en);
  var g=document.createElement("span");g.className="bgrip";g.textContent="⠿ Mover";g.title="Arrastrá la TDE a otro estado";
  g.addEventListener("pointerdown",function(e){bDragStart(e,r,d,s)});
  head.appendChild(h);head.appendChild(g);d.appendChild(head);
@@ -1206,10 +1228,12 @@ function bCard(r,s){
  }
  if(s===1)d.appendChild(bCheck(r,"data","Check list: BRANDING DATA INICIAL LISTO","BRANDING DATA INICIAL LISTO",true,""));
  if(s===2){
-  [["Firma","firma"],["Nombre y Apellido","nombre"],["Cargo","cargo"]].forEach(function(p){
-   d.appendChild(bLinea(p[0]+": "+(D[p[1]]||"—")))});
+  d.appendChild(bDato("Firma: "+(D.firma||"—")));
+  d.appendChild(bDato("Nombre y Apellido: "+(D.nombre||"—")));
+  d.appendChild(bDato("Cargo: "+(D.cargo||"—")));
   var acc=document.createElement("div");acc.className="bacc";
   acc.appendChild(btn("Descargar Branding FULL","sec",function(){bZip(r)}));
+  acc.appendChild(btn("Eliminar","danger",function(){bEliminar(r)}));
   d.appendChild(acc);
   d.appendChild(bAdjunto(r,"marca_pptx","POWER POINT TDE MASTER",".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"));
   d.appendChild(bAdjunto(r,"marca_pdf","PDF MASTER",".pdf,application/pdf"));
@@ -1217,27 +1241,75 @@ function bCard(r,s){
   return d;
  }
  if(s===3){
-  d.appendChild(bLinea("POWER POINT TDE MASTER: "+(A.marca_pptx?A.marca_pptx.nombre:"—")));
-  d.appendChild(bLinea("PDF MASTER: "+(A.marca_pdf?A.marca_pdf.nombre:"—")));
-  var fMsg="TDE ("+(D.firma||"")+", "+(D.nombre||"")+") FINALIZADO !!!!!";
-  var fHab=!!(A.marca_pptx||A.marca_pdf);
-  var fck=document.createElement("div");fck.className="bck";
-  var fcb=document.createElement("input");fcb.type="checkbox";fcb.disabled=true;fcb.checked=!!(r.checklist&&r.checklist.final);
-  var fl=document.createElement("span");fl.textContent="Check list: TDE FINALIZADO";
-  fck.appendChild(fcb);fck.appendChild(fl);
-  if(!fcb.checked){
-   fck.appendChild(btn("Notificar a MR +5492616518318","sec",function(){bNotifFinal(r,"5492616518318",fMsg)}));
-   fck.appendChild(btn("Notificar a Nicolás +5492616576239","sec",function(){bNotifFinal(r,"5492616576239",fMsg)}));
-   fck.querySelectorAll("button").forEach(function(b){b.disabled=!fHab});
-   if(!fHab)fck.appendChild(bLinea("Falta el archivo de la TDE."));
+  if(bEditing[r.id]){
+   var mIn={};
+   [["Firma:","firma",D.firma],["Nombre y Apellido:","nombre",D.nombre],["Cargo:","cargo",D.cargo]].forEach(function(p){
+    var row=document.createElement("div");row.className="bck";
+    var L=document.createElement("span");L.className="bdat";L.textContent=p[0];
+    var I=bInput(p[2],p[0]);I.style.flex="1";
+    mIn[p[1]]=I;row.appendChild(L);row.appendChild(I);d.appendChild(row);
+   });
+   var mIdRow=document.createElement("div");mIdRow.className="bck";
+   var mIdL=document.createElement("span");mIdL.className="bdat";mIdL.textContent="ID:";
+   var mIdI=bInput(r.tarjeta_id,"Número de tarjeta");mIdI.className="bidin";
+   mIdRow.appendChild(mIdL);mIdRow.appendChild(mIdI);d.appendChild(mIdRow);
+   var acc4=document.createElement("div");acc4.className="bacc";
+   acc4.appendChild(btn("Guardar cambios","sec",function(){
+    var nd=Object.assign({},r.datos||{});
+    nd.firma=mIn.firma.value.trim();nd.nombre=mIn.nombre.value.trim();nd.cargo=mIn.cargo.value.trim();
+    r.datos=nd;r.tarjeta_id=mIdI.value.trim()||null;
+    delete bEditing[r.id];
+    bMsg("Guardando cambios…");
+    bSave(r).then(bLoad).catch(bFail);
+   }));
+   acc4.appendChild(btn("Cancelar","sec",function(){delete bEditing[r.id];bPaint()}));
+   d.appendChild(acc4);
+   return d;
   }
-  d.appendChild(fck);
+  d.appendChild(bDato("Firma: "+(D.firma||"—")));
+  d.appendChild(bDato("Nombre y Apellido: "+(D.nombre||"—")));
+  d.appendChild(bDato("Cargo: "+(D.cargo||"—")));
+  var idRow=document.createElement("div");idRow.className="bck";
+  var idL=document.createElement("span");idL.className="bdat";idL.textContent="ID:";
+  var idI=bInput(r.tarjeta_id,"Número de tarjeta");idI.className="bidin";
+  idRow.appendChild(idL);idRow.appendChild(idI);
+  idRow.appendChild(btn("Guardar ID","sec",function(){
+   var v=idI.value.trim();
+   if(!v){bMsg("Escribí el ID antes de guardar.",true);return}
+   r.tarjeta_id=v;
+   bMsg("Guardando ID…");
+   bSave(r).then(bLoad).catch(bFail);
+  }));
+  d.appendChild(idRow);
+  if(!fin){
+   var fMsg="TDE ("+(D.firma||"")+", "+(D.nombre||"")+") FINALIZADO !!!!!";
+   var fHab=!!(A.marca_pptx||A.marca_pdf);
+   var fck=document.createElement("div");fck.className="bck";
+   var fcb=document.createElement("input");fcb.type="checkbox";fcb.disabled=true;fcb.checked=false;
+   var fl=document.createElement("span");fl.textContent="Check list: TDE FINALIZADO";
+   fck.appendChild(fcb);fck.appendChild(fl);
+   var nBtns=[btn("Notificar a MR +5492616518318","sec",function(){notifFin("5492616518318")}),
+              btn("Notificar a Nicolás +5492616576239","sec",function(){notifFin("5492616576239")})];
+   function notifFin(num){
+    var v=idI.value.trim();
+    if(!v){bMsg("Cargá el ID antes de notificar.",true);return}
+    r.tarjeta_id=v;
+    bNotifFinal(r,num,fMsg);
+   }
+   function upd(){var ok=fHab&&idI.value.trim()!=="";nBtns.forEach(function(b){b.disabled=!ok})}
+   nBtns.forEach(function(b){fck.appendChild(b)});
+   idI.addEventListener("input",upd);upd();
+   if(!fHab)fck.appendChild(bLinea("Falta el archivo de la TDE."));
+   else if(!idI.value.trim())fck.appendChild(bLinea("Cargá el ID para notificar."));
+   d.appendChild(fck);
+  }
+  d.appendChild(bDato("Branding de Marca y TDE entregadas"));
+  var acc3=document.createElement("div");acc3.className="bacc";
+  acc3.appendChild(btn("MODIFICAR","sec",function(){bModificar(r)}));
+  acc3.appendChild(btn("REGRESAR","sec",function(){bRegresar(r)}));
+  acc3.appendChild(btn("Eliminar","danger",function(){bEliminar(r)}));
+  d.appendChild(acc3);
  }
- var acc2=document.createElement("div");acc2.className="bacc";
- if(s===3)acc2.appendChild(btn("Descargar FULL FINAL","sec",function(){bZip(r,true)}));
- else acc2.appendChild(btn("Descargar Branding FULL","sec",function(){bZip(r)}));
- if(s===3)acc2.appendChild(btn("Eliminar","danger",function(){bEliminar(r)}));
- d.appendChild(acc2);
  return d;
 }
 // Arrastre con mouse o dedo: la TDE sigue al puntero y se suelta en la columna destino
