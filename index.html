@@ -1185,6 +1185,7 @@ function modificarUsuario(){
  var p=perfilSel(),usr=$("uusr").value.trim(),clave=$("uclave").value;
  if(!p){mset("Elegí un perfil.");return}
  if(!usr){mset("Escribí el usuario.");return}
+ if(!$("unombre").value.trim()||!$("uapellido").value.trim()){mset("Escribí nombre y apellido antes de guardar.");return}
  if(clave&&clave.length<6){mset("La clave debe tener al menos 6 caracteres.");return}
  mset("Guardando cambios…");
  rpc("modificar_usuario",{p_token:tok(),p_id:editId,p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave||null,p_nombre:$("unombre").value.trim(),p_apellido:$("uapellido").value.trim()})
