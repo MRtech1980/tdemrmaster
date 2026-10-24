@@ -190,6 +190,7 @@ body.brandmode .wrap{max-width:1400px}
 #brand .bcard .btn.sec{background:linear-gradient(135deg,#ffffff 0%,var(--c) 100%);color:#0b1f14;border:1px solid var(--c);box-shadow:0 2px 6px rgba(0,0,0,.12);font-weight:700}
 #brand .bdat{display:block;font-size:14px;font-weight:700;color:#14231a;margin-top:4px}
 #brand .bidin{font-weight:700;font-size:14px;color:#0b1f14;background:linear-gradient(135deg,#ffffff 0%,var(--c) 100%);border:1px solid var(--c);border-radius:6px;padding:6px 8px;box-sizing:border-box;width:100%;max-width:160px}
+#brand .bdias{font-size:14px;font-weight:700;margin-top:6px}
 #brand .bfin{background:#0b1f14;color:#39ff14;padding:4px 8px;border-radius:6px;text-shadow:0 0 6px rgba(57,255,20,.7);letter-spacing:.04em}
 #brand .bgrip{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;background:#eef6f0;border:1px solid #9bb5a3;border-radius:8px;padding:4px 8px;font-size:.8rem;color:#14231a;white-space:nowrap;flex:none}
 #brand .bgrip:active{cursor:grabbing}
@@ -1292,7 +1293,23 @@ function bAdjunto(r,k,etiqueta,accept){
  return box;
 }
 function bDato(t){var x=document.createElement("span");x.className="bdat";x.textContent=t;return x}
+/* Días de respuesta: desde el ingreso hasta hoy. Verde < 3 · Amarillo 3 a 5 · Rojo 5 o más */
+function bDias(r){
+ var f=new Date(r.creado_en);if(isNaN(f))return 0;var h=new Date();
+ var a=Date.UTC(f.getFullYear(),f.getMonth(),f.getDate()),b=Date.UTC(h.getFullYear(),h.getMonth(),h.getDate());
+ return Math.max(0,Math.round((b-a)/86400000));
+}
+function bNivel(d){return d>=5?"rojo":d>=3?"amarillo":"verde"}
+var BDIAS_COL={verde:["#15803d","#4ade80"],amarillo:["#a16207","#facc15"],rojo:["#b91c1c","#f87171"]};
 function bCard(r,s){
+ var d=bCardBase(r,s);
+ var n=bDias(r),nv=bNivel(n);
+ var dd=document.createElement("div");dd.className="bdias";dd.style.color=BDIAS_COL[nv][0];
+ dd.textContent="Días de respuesta: "+n;
+ d.appendChild(dd);
+ return d;
+}
+function bCardBase(r,s){
  var d=document.createElement("div");d.className="bcard";d.style.borderLeftColor=BCOLOR[s];
  var fin=!!(r.checklist&&r.checklist.final);
  var head=document.createElement("div");head.className="bhead";
@@ -1502,7 +1519,46 @@ function bZip(r,final){
 function openBrand(){
  if(!esMaster()){mset("Solo el perfil MASTER puede ver BRANDING.");return}
  document.body.classList.remove("mastermode");document.body.classList.add("brandmode");window.scrollTo(0,0);
- bLoad();
+ bLoad().then(bAlertaDias);
+}
+/* Cartel al ingresar: TDE en amarillo (3 a 5 días) o rojo (5 días o más), que no estén finalizadas */
+function bEl(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function bAlertaDias(){
+ var lista=bRecs.filter(function(r){return r.estado!==BSTAGES[3]&&bDias(r)>=3});
+ if(!lista.length)return;
+ var prev=document.getElementById("bAlerta");if(prev)prev.remove();
+ var ov=document.createElement("div");ov.id="bAlerta";ov.setAttribute("role","alertdialog");
+ ov.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10001;display:flex;align-items:center;justify-content:center;padding:16px";
+ var box=document.createElement("div");
+ box.style.cssText="background:#0b1f14;color:#eaf7ee;border:2px solid #facc15;border-radius:16px;padding:18px;width:min(560px,96vw);max-height:88vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.5)";
+ var t=document.createElement("h3");t.textContent="⚠ ADVERTENCIA: TIEMPO DE RESPUESTA";
+ t.style.cssText="margin:0 0 6px;color:#facc15;font-size:1.1rem";
+ var sub=document.createElement("p");sub.textContent="Las siguientes TDE superan el tiempo de respuesta esperado:";
+ sub.style.cssText="margin:0 0 12px;line-height:1.4";
+ box.appendChild(t);box.appendChild(sub);
+ lista.forEach(function(r){
+  var n=bDias(r),nv=bNivel(n),c=BDIAS_COL[nv],D=r.datos||{};
+  var it=document.createElement("div");
+  it.style.cssText="border-left:6px solid "+c[1]+";background:#06140c;border-radius:10px;padding:10px 12px;margin:0 0 10px";
+  var l1=document.createElement("div");l1.innerHTML="";
+  l1.appendChild(bEl("div","","Firma: "+(D.firma||"—")));
+  l1.appendChild(bEl("div","","Nombre y apellido: "+(D.nombre||"—")));
+  var row=document.createElement("div");row.style.cssText="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px";
+  var lb=bEl("span","","Días de respuesta:");lb.style.cssText="font-weight:700;color:"+c[1];
+  var ov1=bEl("span","",String(n));
+  ov1.style.cssText="display:inline-block;min-width:44px;text-align:center;padding:4px 14px;border-radius:999px;font-weight:800;font-size:16px;color:#fff;background:linear-gradient(135deg,"+c[0]+","+c[1]+")";
+  row.appendChild(lb);row.appendChild(ov1);
+  if(nv==="rojo"){
+   var ov2=bEl("span","","MÁS DE 5 DÍAS");
+   ov2.style.cssText="display:inline-block;padding:4px 14px;border-radius:999px;font-weight:800;font-size:13px;color:#fff;background:linear-gradient(135deg,#b91c1c,#f87171)";
+   row.appendChild(ov2);
+  }
+  it.appendChild(l1);it.appendChild(row);box.appendChild(it);
+ });
+ var ok=btn("Entendido","",function(){ov.remove()});
+ ok.style.cssText="display:block;margin:6px auto 0;padding:10px 26px;font-weight:800;letter-spacing:.05em";
+ box.appendChild(ok);
+ ov.appendChild(box);document.body.appendChild(ov);
 }
 $("tbrand").addEventListener("click",openBrand);
 $("bback").onclick=function(){document.body.classList.remove("brandmode");openMaster()};
