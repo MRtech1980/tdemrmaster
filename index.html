@@ -473,6 +473,10 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
    <span class="bl">Provincia</span><input type="text" id="bf_provincia">
    <span class="bl">País</span><input type="text" id="bf_pais">
    <span class="bl">Web (opcional)</span><input type="text" id="bf_web">
+   <span class="bl">Instagram</span><input type="text" id="bf_instagram">
+   <span class="bl">Facebook</span><input type="text" id="bf_facebook">
+   <span class="bl">LinkedIn</span><input type="text" id="bf_linkedin">
+   <span class="bl">TikTok</span><input type="text" id="bf_tiktok">
    <button type="button" id="bf_save" class="btn">GUARDAR TDE</button>
   </div>
  </div>
@@ -1444,7 +1448,7 @@ function bEliminar(r){
 }
 function bGuardarFicha(){
  var v=function(id){return $(id).value.trim()};
- var datos={firma:v("bf_firma"),nombre:v("bf_nombre"),cargo:v("bf_cargo"),telefono:v("bf_tel"),mail:v("bf_mail"),domicilio:v("bf_domicilio"),numero:v("bf_numero"),localidad:v("bf_localidad"),provincia:v("bf_provincia"),pais:v("bf_pais"),web:v("bf_web")};
+ var datos={firma:v("bf_firma"),nombre:v("bf_nombre"),cargo:v("bf_cargo"),telefono:v("bf_tel"),mail:v("bf_mail"),domicilio:v("bf_domicilio"),numero:v("bf_numero"),localidad:v("bf_localidad"),provincia:v("bf_provincia"),pais:v("bf_pais"),web:v("bf_web"),instagram:v("bf_instagram"),facebook:v("bf_facebook"),linkedin:v("bf_linkedin"),tiktok:v("bf_tiktok")};
  if(!datos.nombre||!datos.telefono){bMsg("Completá al menos Nombre y Apellido y Número de teléfono.",true);return}
  var logo=$("bf_logo").files[0],foto=$("bf_foto").files[0];
  bMsg("Guardando TDE…");
@@ -1457,7 +1461,7 @@ function bGuardarFicha(){
    return Promise.all(jobs).then(function(){return bSave(rec)});
   })
   .then(function(){
-   ["bf_firma","bf_nombre","bf_cargo","bf_tel","bf_mail","bf_domicilio","bf_numero","bf_localidad","bf_provincia","bf_pais","bf_web"].forEach(function(k){$(k).value=""});
+   ["bf_firma","bf_nombre","bf_cargo","bf_tel","bf_mail","bf_domicilio","bf_numero","bf_localidad","bf_provincia","bf_pais","bf_web","bf_instagram","bf_facebook","bf_linkedin","bf_tiktok"].forEach(function(k){$(k).value=""});
    $("bf_logo").value="";$("bf_foto").value="";
    bMsg("TDE guardada en DATA INICIAL.");
    return bLoad();
@@ -1467,7 +1471,7 @@ function bGuardarFicha(){
 function bZip(r,final){
  if(typeof JSZip==="undefined"){bMsg("No se cargó el generador de ZIP. Revisá la conexión.",true);return}
  var zip=new JSZip(),D=r.datos||{},A=r.archivos||{};
- var ficha=["BRANDING · "+r.estado,"Ingresado el "+bFecha(r.creado_en),"","Firma: "+(D.firma||""),"Nombre y Apellido: "+(D.nombre||""),"Cargo: "+(D.cargo||""),"Número de teléfono: "+(D.telefono||""),"Mail: "+(D.mail||""),"Domicilio: "+(D.domicilio||""),"Número: "+(D.numero||""),"Localidad: "+(D.localidad||""),"Provincia: "+(D.provincia||""),"País: "+(D.pais||""),"Web: "+(D.web||"")].join("\n");
+ var ficha=["BRANDING · "+r.estado,"Ingresado el "+bFecha(r.creado_en),"","Firma: "+(D.firma||""),"Nombre y Apellido: "+(D.nombre||""),"Cargo: "+(D.cargo||""),"Número de teléfono: "+(D.telefono||""),"Mail: "+(D.mail||""),"Domicilio: "+(D.domicilio||""),"Número: "+(D.numero||""),"Localidad: "+(D.localidad||""),"Provincia: "+(D.provincia||""),"País: "+(D.pais||""),"Web: "+(D.web||""),"Instagram: "+(D.instagram||""),"Facebook: "+(D.facebook||""),"LinkedIn: "+(D.linkedin||""),"TikTok: "+(D.tiktok||"")].join("\n");
  zip.file("ficha.txt",ficha);
  zip.file("branding.json",JSON.stringify({id:r.id,estado:r.estado,creado_en:r.creado_en,datos:D,checklist:r.checklist||{}},null,2));
  var jobs=[];
