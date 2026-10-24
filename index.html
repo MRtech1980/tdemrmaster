@@ -1221,7 +1221,7 @@ function bLoad(){
  bMsg("Cargando branding…");
  return rpc("listar_branding",{p_token:tok()}).then(function(list){
   bRecs=list||[];bPaint();
-  bMsg(bRecs.length?bRecs.length+" TDE en BRANDING":"Todavía no hay TDE en BRANDING.");
+  bResumen(bRecs.length);
  }).catch(function(e){bMsg("No se pudo cargar: "+errTxt(e),true)});
 }
 function bPaint(){
@@ -1231,6 +1231,10 @@ function bPaint(){
   var h=document.querySelector('#brand .bcol[data-idx="'+s+'"] h3');
   if(h)h.textContent=BSTAGES[s]+" ("+n+")";
  }
+}
+function bResumen(n){
+ var m=$("bmsg");m.style.color="";
+ m.innerHTML=n?"<b style=\"font-size:1.25em\">"+n+"</b> <b>TDE en BRANDING</b>":"<b>Todavía no hay TDE en BRANDING.</b>";
 }
 function bLinea(t){var x=document.createElement("span");x.className="bl";x.textContent=t;return x}
 function bInput(val,ph){var x=document.createElement("input");x.type="text";x.value=val||"";x.placeholder=ph||"";return x}
