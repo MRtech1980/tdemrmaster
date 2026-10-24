@@ -176,6 +176,8 @@ body.brandmode .fv{display:none!important}
 body.brandmode .wrap{max-width:1400px}
 #brand .bboard{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(290px,1fr);gap:14px;overflow-x:auto;padding:4px 2px 12px;align-items:start}
 #brand .bcol{background:#0f1a14;border-radius:14px;padding:12px;border-top:6px solid var(--c);min-height:220px;color:#eaf7ee}
+#brand .bregresar{display:inline-flex;align-items:center;gap:6px;font-weight:700}
+#brand .bregresar svg{flex:0 0 auto}
 #brand .bcol h3{margin:0 0 10px;font-size:.95rem;letter-spacing:.06em;color:var(--c)}
 #brand .bcard{background:#fff;color:#14231a;border-left:6px solid var(--c);border-radius:10px;padding:10px 12px;margin:0 0 12px;box-shadow:0 2px 8px rgba(0,0,0,.25);font-size:.88rem;display:flex;flex-direction:column;gap:4px}
 #brand .bcard b{display:block;margin-bottom:4px}
@@ -451,8 +453,9 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <section id="brand">
 <div class="kanhead">
 <button type="button" id="bback" class="btn sec">← Volver a TDE MASTER</button>
-<h2>TDE MASTER · BRANDING</h2>
+<h2>BRANDING DE MARCA</h2>
 <button type="button" id="bref" class="btn sec">ACTUALIZAR</button>
+<button type="button" id="bregresar" class="btn sec bregresar" aria-label="REGRESAR a la pantalla anterior"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 7l-5 5 5 5M9 12h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>REGRESAR</span></button>
 <p id="bmsg" role="status"></p>
 </div>
 <div class="bboard">
@@ -1223,8 +1226,10 @@ function bLoad(){
 }
 function bPaint(){
  for(var s=0;s<4;s++){
-  var box=$("bl"+s);box.innerHTML="";
-  bRecs.forEach(function(r){if(r.estado===BSTAGES[s])box.appendChild(bCard(r,s))});
+  var box=$("bl"+s);box.innerHTML="";var n=0;
+  bRecs.forEach(function(r){if(r.estado===BSTAGES[s]){n++;box.appendChild(bCard(r,s))}});
+  var h=document.querySelector('#brand .bcol[data-idx="'+s+'"] h3');
+  if(h)h.textContent=BSTAGES[s]+" ("+n+")";
  }
 }
 function bLinea(t){var x=document.createElement("span");x.className="bl";x.textContent=t;return x}
@@ -1497,6 +1502,7 @@ function openBrand(){
 }
 $("tbrand").addEventListener("click",openBrand);
 $("bback").onclick=function(){document.body.classList.remove("brandmode");openMaster()};
+$("bregresar").onclick=$("bback").onclick;
 $("bf_save").onclick=bGuardarFicha;
 $("bref").onclick=function(){bLoad()};
 
