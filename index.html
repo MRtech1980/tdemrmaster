@@ -935,12 +935,7 @@ function renderAuth(){renderLoginBox($("kauth"),$("kmsg"),paintKan)}
 // Caja de ingreso reutilizable: muestra la sesión o el formulario de email y contraseña
 function renderLoginBox(box,msg,onChange){
  if(!box)return;box.innerHTML="";
- if(sessOk()){
-  var s=document.createElement("span");s.textContent="Sesión: "+SESS.email;
-  box.appendChild(s);
-  box.appendChild(btn("Salir","sec",function(){saveSess(null);msg.textContent="Sesión cerrada";onChange();if(window.lockApp)lockApp()}));
-  return;
- }
+ if(sessOk())return;
  var em=document.createElement("input");em.type="text";em.placeholder="Usuario";em.autocomplete="username";
  var pw=document.createElement("input");pw.type="password";pw.placeholder="Contraseña";pw.autocomplete="current-password";
  box.appendChild(em);box.appendChild(pw);
