@@ -346,7 +346,7 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 <section class="intro fv">
 <h1 id="cabTit">PARTNERSHIP</h1>
 <label for="notif">Celu que recibirá la notificación por WhatsApp de la TDE generada</label>
-<input type="tel" id="notif" value="+5493425040582" inputmode="tel" autocomplete="off">
+<input type="tel" id="notif" value="" inputmode="tel" autocomplete="off">
 <p class="dest">La notificación se envía por WhatsApp a este número al tocar GENERAR.</p>
 </section>
 
@@ -593,6 +593,7 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 <label>Clave<input type="password" id="uclave" autocomplete="new-password"></label>
 <label>Nombre<input type="text" id="unombre" autocomplete="off"></label>
 <label>Apellido<input type="text" id="uapellido" autocomplete="off"></label>
+<label>Celular (notificaciones de su formulario de ALTA CLIENTE)<input type="tel" id="ucel" placeholder="Ej: +5492616576239" inputmode="tel" autocomplete="off"></label>
 <button type="button" id="ucrear" class="btn">Crear usuario</button>
 </div>
 
@@ -1224,6 +1225,7 @@ function aplicarColoresLogo(src){
  });
 }
 function cargarLogoSesion(){
+ cargarCelularSesion();
  if(!sessOk()){LOGO_SESION="";pintarCabecera();aplicarColoresLogo("");return Promise.resolve()}
  return rpc("logo_sesion",{p_token:tok()}).then(function(l){LOGO_SESION=l||"";pintarCabecera();return aplicarColoresLogo(LOGO_SESION)}).catch(function(){LOGO_SESION="";pintarCabecera();aplicarColoresLogo("")});
 }
@@ -1376,7 +1378,7 @@ function pintarUsuarios(){
  var wrap=document.createElement("div");wrap.className="uwrap";
  var t=document.createElement("table");t.className="utab";
  var hd=document.createElement("thead"),hr=document.createElement("tr");
- ["PERFIL","LOGO","FIRMA","NOMBRE","APELLIDO","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===5)th.colSpan=2;hr.appendChild(th)});
+ ["PERFIL","LOGO","FIRMA","NOMBRE","APELLIDO","CELULAR","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===6)th.colSpan=2;hr.appendChild(th)});
  hd.appendChild(hr);t.appendChild(hd);
  var tb=document.createElement("tbody");
  list.forEach(function(x){
@@ -1385,7 +1387,7 @@ function pintarUsuarios(){
   var tdL=document.createElement("td");
   if(x.logo){var im=document.createElement("img");im.src=x.logo;im.alt="Logo";im.style.cssText="height:40px;max-width:120px;object-fit:contain";tdL.appendChild(im)}else{tdL.textContent="—"}
   tr.appendChild(tdL);
-  [x.firma,x.nombre,x.apellido].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
+  [x.firma,x.nombre,x.apellido,x.celular].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
   var t1=document.createElement("td");t1.appendChild(btn("Modificar","sec",function(){editarUsuario(x)}));tr.appendChild(t1);
   var t2=document.createElement("td");if(x.usuario!=="MRTech")t2.appendChild(btn("Eliminar","danger",function(){delUsuario(x.id)}));tr.appendChild(t2);
   tb.appendChild(tr);
@@ -1411,6 +1413,13 @@ function prepararLogo(f){
   r.readAsDataURL(f);
  });
 }
+function guardarCelular(id){
+ return rpc("guardar_celular_usuario",{p_token:tok(),p_id:id,p_celular:$("ucel").value.trim()});
+}
+function cargarCelularSesion(){
+ if(!sessOk()){$("notif").value="";return Promise.resolve()}
+ return rpc("celular_sesion",{p_token:tok()}).then(function(c){$("notif").value=c||""}).catch(function(){});
+}
 function guardarLogoSiHay(id){
  var f=$("ulogo").files&&$("ulogo").files[0];
  if(!f)return Promise.resolve();
@@ -1432,8 +1441,8 @@ function crearUsuario(){
  if(clave.length<6){mset("La clave debe tener al menos 6 caracteres.");return}
  mset("Creando usuario…");
  rpc("crear_usuario",{p_token:tok(),p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave,p_nombre:nom,p_apellido:ape})
-  .then(function(id){return guardarLogoSiHay(id)})
-  .then(function(){$("uusr").value="";$("uclave").value="";$("unombre").value="";$("uapellido").value="";mset("Usuario creado.");return loadUsuarios()})
+  .then(function(id){return guardarCelular(id).then(function(){return guardarLogoSiHay(id)})})
+  .then(function(){$("uusr").value="";$("uclave").value="";$("unombre").value="";$("uapellido").value="";$("ucel").value="";mset("Usuario creado.");return loadUsuarios()})
   .catch(function(e){mset("No se pudo crear el usuario: "+errTxt(e))});
 }
 var editId=null;
@@ -1441,7 +1450,7 @@ function editarUsuario(x){
  editId=x.id;
  for(var i=0;i<PERFILES.length;i++){if(PERFILES[i].nombre===x.perfil_nombre){$("uperfil").value=PERFILES[i].id}}
  $("ufirma").value=x.firma||"";$("uusr").value=x.usuario;$("uclave").value="";
- $("unombre").value=x.nombre||"";$("uapellido").value=x.apellido||"";
+ $("unombre").value=x.nombre||"";$("uapellido").value=x.apellido||"";$("ucel").value=x.celular||"";
  $("uclave").placeholder="Dejar vacía para no cambiarla";
  $("ucrear").textContent="Guardar cambios";
  mset("Modificando "+x.usuario+". Cambiá los datos y tocá Guardar cambios.");
@@ -1450,7 +1459,7 @@ function editarUsuario(x){
 function cancelarEdit(){
  editId=null;$("ucrear").textContent="Crear usuario";
  $("uusr").value="";$("uclave").value="";$("uclave").placeholder="";$("ufirma").value="";
- $("unombre").value="";$("uapellido").value="";
+ $("unombre").value="";$("uapellido").value="";$("ucel").value="";
 }
 function modificarUsuario(){
  var p=perfilSel(),usr=$("uusr").value.trim(),clave=$("uclave").value;
@@ -1460,6 +1469,7 @@ function modificarUsuario(){
  if(clave&&clave.length<6){mset("La clave debe tener al menos 6 caracteres.");return}
  mset("Guardando cambios…");
  rpc("modificar_usuario",{p_token:tok(),p_id:editId,p_perfil:p.id,p_firma:$("ufirma").value.trim(),p_usuario:usr,p_clave:clave||null,p_nombre:$("unombre").value.trim(),p_apellido:$("uapellido").value.trim()})
+  .then(function(){return guardarCelular(editId)})
   .then(function(){return guardarLogoSiHay(editId)})
   .then(function(){cancelarEdit();mset("Usuario modificado.");return loadUsuarios()})
   .catch(function(e){mset("No se pudo modificar: "+errTxt(e))});
