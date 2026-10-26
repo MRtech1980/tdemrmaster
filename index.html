@@ -247,6 +247,8 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 .pchecks li{break-inside:avoid;padding:1px 0}
 .pchecks .si{color:#0d6b2a;font-weight:700}
 .pchecks .no{color:#8aa096}
+.usearch{margin:0 0 10px}
+.usearch input{width:100%;padding:12px 18px;border-radius:999px;border:1.5px solid var(--head);font:inherit;background:#ffffff}
 #ulist .uwrap{width:100%;overflow-x:auto;border:1px solid #d6e6db;border-radius:12px;background:#fff;margin-top:8px}
 #ulist .utab{width:100%;min-width:620px;border-collapse:collapse;font-size:.9rem}
 #ulist .utab th{background:#0b3d1f;color:#e9fff1;text-align:left;padding:10px 12px;font-size:.78rem;letter-spacing:.06em;white-space:nowrap}
@@ -579,6 +581,8 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 
 </div>
 <div id="tab-usr" hidden>
+<div class="usearch"><input type="search" id="usearch" placeholder="Buscar por usuario, nombre, apellido, firma o perfil" autocomplete="off"></div>
+<div id="ulist"></div>
 <div class="mform" id="uform">
 <div class="ulogo"><span>Logo del partnership (se muestra en el encabezado de ALTA CLIENTE)</span><input type="file" id="ulogo" accept="image/*"><img id="ulogoPrev" alt="" hidden></div>
 <label>Perfil<select id="uperfil"><option value="">— Elegí un perfil —</option></select></label>
@@ -589,7 +593,7 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 <label>Apellido<input type="text" id="uapellido" autocomplete="off"></label>
 <button type="button" id="ucrear" class="btn">Crear usuario</button>
 </div>
-<div id="ulist"></div>
+
 </div>
 </div>
 </div>
@@ -1353,34 +1357,43 @@ function delPerfil(id){
 }
 
 // ---- USUARIOS ----
+var USU_CACHE=[];
 function loadUsuarios(){
- var box=$("ulist");box.innerHTML="";
- if(!esMaster()){var n=document.createElement("p");n.className="note";n.textContent="Solo el perfil MASTER ve los usuarios.";box.appendChild(n);return Promise.resolve()}
+ if(!esMaster()){var box0=$("ulist");box0.innerHTML="";var n=document.createElement("p");n.className="note";n.textContent="Solo el perfil MASTER ve los usuarios.";box0.appendChild(n);return Promise.resolve()}
  return rpc("listar_usuarios",{p_token:tok()}).then(function(list){
-  list=(list||[]).slice().sort(function(a,b){
+  USU_CACHE=(list||[]).slice().sort(function(a,b){
    return (a.perfil_nombre||"").localeCompare(b.perfil_nombre||"","es")||(a.apellido||"").localeCompare(b.apellido||"","es")||(a.nombre||"").localeCompare(b.nombre||"","es")||(a.usuario||"").localeCompare(b.usuario||"","es");
   });
-  box.innerHTML="";
-  if(!list.length){var p=document.createElement("p");p.className="note";p.textContent="Todavía no hay usuarios creados.";box.appendChild(p);return}
-  var wrap=document.createElement("div");wrap.className="uwrap";
-  var t=document.createElement("table");t.className="utab";
-  var hd=document.createElement("thead"),hr=document.createElement("tr");
-  ["PERFIL","LOGO","FIRMA","NOMBRE","APELLIDO","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===5)th.colSpan=2;hr.appendChild(th)});
-  hd.appendChild(hr);t.appendChild(hd);
-  var tb=document.createElement("tbody");
-  list.forEach(function(x){
-   var tr=document.createElement("tr");
-   var tdP=document.createElement("td");tdP.textContent=x.perfil_nombre||"—";tr.appendChild(tdP);
-   var tdL=document.createElement("td");
-   if(x.logo){var im=document.createElement("img");im.src=x.logo;im.alt="Logo";im.style.cssText="height:40px;max-width:120px;object-fit:contain";tdL.appendChild(im)}else{tdL.textContent="—"}
-   tr.appendChild(tdL);
-   [x.firma,x.nombre,x.apellido].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
-   var t1=document.createElement("td");t1.appendChild(btn("Modificar","sec",function(){editarUsuario(x)}));tr.appendChild(t1);
-   var t2=document.createElement("td");if(x.usuario!=="MRTech")t2.appendChild(btn("Eliminar","danger",function(){delUsuario(x.id)}));tr.appendChild(t2);
-   tb.appendChild(tr);
-  });
-  t.appendChild(tb);wrap.appendChild(t);box.appendChild(wrap);
+  pintarUsuarios();
  }).catch(function(e){mset("No se pudo leer los usuarios: "+errTxt(e))});
+}
+function pintarUsuarios(){
+ var box=$("ulist");box.innerHTML="";
+ if(!USU_CACHE.length){var p=document.createElement("p");p.className="note";p.textContent="Todavía no hay usuarios creados.";box.appendChild(p);return}
+ var q=(($("usearch")&&$("usearch").value)||"").trim().toLowerCase();
+ var list=USU_CACHE.filter(function(x){
+  if(!q)return true;
+  return [x.usuario,x.nombre,x.apellido,x.firma,x.perfil_nombre].some(function(v){return String(v||"").toLowerCase().indexOf(q)>=0});
+ });
+ if(!list.length){var p2=document.createElement("p");p2.className="note";p2.textContent="Ningún usuario coincide con la búsqueda.";box.appendChild(p2);return}
+ var wrap=document.createElement("div");wrap.className="uwrap";
+ var t=document.createElement("table");t.className="utab";
+ var hd=document.createElement("thead"),hr=document.createElement("tr");
+ ["PERFIL","LOGO","FIRMA","NOMBRE","APELLIDO","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===5)th.colSpan=2;hr.appendChild(th)});
+ hd.appendChild(hr);t.appendChild(hd);
+ var tb=document.createElement("tbody");
+ list.forEach(function(x){
+  var tr=document.createElement("tr");
+  var tdP=document.createElement("td");tdP.textContent=x.perfil_nombre||"—";tr.appendChild(tdP);
+  var tdL=document.createElement("td");
+  if(x.logo){var im=document.createElement("img");im.src=x.logo;im.alt="Logo";im.style.cssText="height:40px;max-width:120px;object-fit:contain";tdL.appendChild(im)}else{tdL.textContent="—"}
+  tr.appendChild(tdL);
+  [x.firma,x.nombre,x.apellido].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
+  var t1=document.createElement("td");t1.appendChild(btn("Modificar","sec",function(){editarUsuario(x)}));tr.appendChild(t1);
+  var t2=document.createElement("td");if(x.usuario!=="MRTech")t2.appendChild(btn("Eliminar","danger",function(){delUsuario(x.id)}));tr.appendChild(t2);
+  tb.appendChild(tr);
+ });
+ t.appendChild(tb);wrap.appendChild(t);box.appendChild(wrap);
 }
 // Redimensiona el logo (máx. 480 px) y devuelve PNG en data URL
 function prepararLogo(f){
@@ -1412,6 +1425,7 @@ $("ulogo").addEventListener("change",function(){
  if(!f){$("ulogoPrev").hidden=true;return}
  prepararLogo(f).then(function(d){$("ulogoPrev").src=d;$("ulogoPrev").hidden=false}).catch(function(){mset("No se pudo leer el logo.")});
 });
+$("usearch").addEventListener("input",function(){pintarUsuarios()});
 function crearUsuario(){
  if(!esMaster()){mset("Solo el perfil MASTER puede crear usuarios.");return}
  var p=perfilSel(),usr=$("uusr").value.trim(),clave=$("uclave").value,nom=$("unombre").value.trim(),ape=$("uapellido").value.trim();
@@ -1578,6 +1592,7 @@ function bCardBase(r,s){
  var head=document.createElement("div");head.className="bhead";
  var h=document.createElement("b");
  if(s===3&&fin){h.className="bfin";h.textContent="TDE FINALIZADO !!!!!"}
+ else if(s===3){h.textContent=""}
  else h.textContent="Ingresado el "+bFecha(r.creado_en);
  var g=document.createElement("span");g.className="bgrip";g.textContent="⠿ Mover";g.title="Arrastrá la TDE a otro estado";
  g.addEventListener("pointerdown",function(e){bDragStart(e,r,d,s)});
