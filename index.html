@@ -557,12 +557,13 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 </aside>
 <div class="mmain">
 <div id="tab-perf">
+<div id="plist"></div>
 <div class="mform" id="pform">
 <label>Nombre del perfil<input type="text" id="pnom" placeholder="Ej: Administrador"></label>
 <div class="pchk"><b>Árbol de permisos: qué puede ver</b><div id="pperm"></div></div>
 <button type="button" id="pcrear" class="btn">Guardar perfil</button>
 </div>
-<div id="plist"></div>
+
 </div>
 <div id="tab-usr" hidden>
 <div class="mform" id="uform">
@@ -1486,7 +1487,7 @@ function bCheck(r,key,texto,msg,habil,ayuda,num){
 function bModificar(r){bEditing[r.id]=true;bPaint()}
 function bNotifFinal(r,num,msg){
  bWa(msg,num);
- r.checklist=Object.assign({},r.checklist||{});r.checklist.final=true;
+ r.checklist=Object.assign({},r.checklist||{});r.checklist.final=true;r.checklist.final_en=new Date().toISOString();
  var D=r.datos||{};
  var jobs=[bSave(r)];
  bRecs.forEach(function(x){
@@ -1499,7 +1500,7 @@ function bNotifFinal(r,num,msg){
 }
 function bRegresar(r){
  r.estado=BSTAGES[2];
- r.checklist=Object.assign({},r.checklist||{});r.checklist.final=false;
+ r.checklist=Object.assign({},r.checklist||{});r.checklist.final=false;delete r.checklist.final_en;
  bMsg("Regresando a DESARROLLO…");
  bSave(r).then(bLoad).catch(bFail);
 }
@@ -1531,15 +1532,20 @@ function bNivel(d){return d>=5?"rojo":d>=3?"amarillo":"verde"}
 var BDIAS_COL={verde:["#15803d","#4ade80"],amarillo:["#a16207","#facc15"],rojo:["#b91c1c","#f87171"]};
 function bCard(r,s){
  var d=bCardBase(r,s);
- var n=bDias(r),nv=bNivel(n),f=new Date(r.creado_en),h=new Date();
+ var n=bDias(r),nv=bNivel(n);
  var dd=document.createElement("div");dd.className="bdias";dd.style.color=BDIAS_COL[nv][0];
  dd.textContent="Días de respuesta: "+n;
- var det=document.createElement("div");det.className="bdiasdet";
- var fi=isNaN(f)?"—":f.toLocaleDateString("es-AR"),ha=h.toLocaleDateString("es-AR");
- var txt={verde:"Verde (menos de 3 días)",amarillo:"Amarillo (de 3 a 5 días)",rojo:"Rojo (5 días o más)"}[nv];
- det.appendChild(bDato("Ingreso: "+fi+" · Cálculo al: "+ha));
- det.appendChild(bDato("Nivel: "+txt));
- d.appendChild(dd);d.appendChild(det);
+ if(s===3){
+  var fe=(r.checklist&&r.checklist.final_en)||"";
+  var top=document.createElement("div");top.className="bdiasdet";
+  var fdia=function(x){var q=new Date(x);return isNaN(q)?"—":q.toLocaleDateString("es-AR")};
+  top.appendChild(bDato("Ingreso: "+fdia(r.creado_en)));
+  top.appendChild(bDato("Finalizado: "+(fe?fdia(fe):"—")));
+  top.appendChild(dd);
+  d.insertBefore(top,d.firstChild);
+  return d;
+ }
+ d.appendChild(dd);
  return d;
 }
 function bCardBase(r,s){
