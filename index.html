@@ -474,12 +474,13 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <section id="kan">
 <div class="kanhead">
 <button type="button" id="kback" class="btn sec">← Volver</button>
-<h2>TDE PARTNERSHIP</h2>
+<h2 id="kTit">TDE PARTNERSHIP</h2>
 <button type="button" id="kref" class="btn sec">Actualizar</button>
 <p id="kmsg" role="status"></p>
 <div id="kauth"></div>
 </div>
 <p class="kannote">Movés cada TDE de etapa con los botones de su tarjeta y marcás los procedimientos a medida que se cumplen. Desplazá el tablero hacia la derecha para ver todas las etapas.</p>
+<div class="kfiltro" id="kfiltro" style="display:none"><label>Filtrar por PARTNERSHIP<select id="kpart"><option value="">Todos los PARTNERSHIP</option></select></label></div>
 <div id="board"></div>
 </section>
 
@@ -544,7 +545,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <button type="button" class="tab on" data-t="perf">PERFILES</button>
 <button type="button" class="tab" data-t="usr">USUARIOS</button>
 <button type="button" class="tab" id="tbrand" data-t="brand">BRANDING</button>
-<button type="button" class="tab" id="tseg" data-t="seg">TDE SEGUIMIENTO</button>
+<button type="button" class="tab" id="tseg" data-t="seg">TDE SEGUIMIENTO MASTER</button>
 </div>
 <div id="tab-perf">
 <div class="mform" id="pform">
@@ -750,7 +751,7 @@ function saveRecord(ficha){
  [].forEach.call($("pres_f").files,function(f){var r=base+"presentacion_"+safe(f.name);arch.presentacion.push({nombre:f.name,ruta:r});ups.push([r,f])});
  [].forEach.call($("cat_f").files,function(f){var r=base+"catalogo_"+safe(f.name);arch.catalogo.push({nombre:f.name,ruta:r});ups.push([r,f])});
  return ups.reduce(function(p,u){return p.then(function(){return uploadFile(u[0],u[1])})},Promise.resolve())
-  .then(function(){return insertRow({id:id,fantasia:v("fantasia"),persona:v("persona"),plan:v("plan"),datos:collect(),ficha:ficha,archivos:arch})})
+  .then(function(){return insertRow({id:id,fantasia:v("fantasia"),persona:v("persona"),plan:v("plan"),datos:Object.assign({},collect(),{partnership:(SESS&&SESS.firma)||""}),ficha:ficha,archivos:arch})})
   .then(function(){return pruneOld(MAX_TDE)})
   .then(function(){return id})}
 
@@ -943,10 +944,38 @@ function zipRecs(recs,label){
   return recs.length});
 }
 
+var KAN_MODO="partner";
+function parte(r){return ((r.datos||{}).partnership)||""}
+function abrirSeguimiento(modo){
+ KAN_MODO=modo;
+ $("kTit").textContent=modo==="master"?"TDE SEGUIMIENTO MASTER":"TDE SEGUIMIENTO";
+ $("kfiltro").style.display=modo==="master"?"":"none";
+ irVista("kanmode");loadKan();
+}
+function llenarFiltroKan(){
+ var sel=$("kpart"),prev=sel.value,nombres={};
+ kanRecs.forEach(function(r){var n=parte(r);if(n)nombres[n]=1});
+ sel.innerHTML='<option value="">Todos los PARTNERSHIP</option>';
+ Object.keys(nombres).sort().forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o)});
+ var o2=document.createElement("option");o2.value="__sin__";o2.textContent="Sin PARTNERSHIP";sel.appendChild(o2);
+ sel.value=prev;
+}
+function visiblesKan(){
+ if(KAN_MODO==="partner"){
+  var f=String((SESS&&SESS.firma)||"").toLowerCase();
+  return kanRecs.filter(function(r){return parte(r).toLowerCase()===f&&f!==""});
+ }
+ var sel=$("kpart").value;
+ return kanRecs.filter(function(r){
+  if(!sel)return true;
+  if(sel==="__sin__")return parte(r)==="";
+  return parte(r)===sel;
+ });
+}
 function loadKan(){
  setKm("Cargando TDE…");
  return dbList().then(function(recs){
-  kanRecs=recs;paintKan();
+  kanRecs=recs;llenarFiltroKan();paintKan();
   setKm(recs.length?recs.length+(recs.length===1?" TDE en el tablero":" TDE en el tablero"):"Todavía no hay TDE en el tablero.");
  }).catch(function(e){kanRecs=[];paintKan();setKm("No se pudo cargar las TDE: "+errTxt(e))});
 }
@@ -955,7 +984,7 @@ function paintKan(){
  renderAuth();
  var b=$("board");b.innerHTML="";
  ESTADOS.forEach(function(es,i){
-  var items=kanRecs.filter(function(r){return estIdx(r)===i});
+  var items=visiblesKan().filter(function(r){return estIdx(r)===i});
   var col=document.createElement("div");col.className="col";col.style.setProperty("--c",es.c);col.style.setProperty("--t",es.t||"#ffffff");
   var h=document.createElement("div");h.className="colh";
   var t=document.createElement("div");t.textContent=es.n;
@@ -988,7 +1017,7 @@ function cardEl(r,i){
  top.appendChild(fe);top.appendChild(grip);d.appendChild(top);
  // Firma (partnership) y datos de la TDE, sin títulos
  var firma=document.createElement("div");firma.className="firma";
- ["MULTISISTEMA","GABRIEL D'AMICO"].forEach(function(t){var sp=document.createElement("span");sp.textContent=t;firma.appendChild(sp)});
+ var spf=document.createElement("span");spf.textContent=parte(r)||"SIN PARTNERSHIP";firma.appendChild(spf);
  d.appendChild(firma);
  [["kf",r.fantasia||""],["kp",(r.plan||"").toUpperCase()],["kv",nt>0?"$ "+(nt*1.21).toLocaleString("es-AR",{minimumFractionDigits:0,maximumFractionDigits:2}):"A definir"]].forEach(function(x){
   var p=document.createElement("div");p.className=x[0];p.textContent=x[1];d.appendChild(p);
@@ -1090,7 +1119,7 @@ function irVista(v){var c=vistaActual();if(c!==v)VISTAS.push(c);setVista(v)}
 function volverVista(){setVista(VISTAS.pop()||"viewfun")}
 $("partner").onclick=function(){irVista("viewpartner")};
 $("palta").onclick=function(){irVista("viewalta")};
-$("pseg").onclick=function(){irVista("kanmode");loadKan()};
+$("pseg").onclick=function(){abrirSeguimiento("partner")};
 $("vback").onclick=function(){volverVista()};
 $("fregresar").onclick=function(){saveSess(null);lockApp()};
 $("kback").onclick=function(){volverVista()};
@@ -1100,12 +1129,49 @@ $("kref").onclick=function(){loadKan()};
 // Árbol de permisos: cada ítem es un nodo. Se agregan más a medida que se definan.
 var PERMISOS=[
  {k:"partnership",t:"TDE PARTNERSHIP"},
+ {k:"partnership.alta",t:"TDE PARTNERSHIP · TDE ALTA CLIENTE",p:"partnership"},
+ {k:"partnership.seguimiento",t:"TDE PARTNERSHIP · TDE SEGUIMIENTO",p:"partnership"},
  {k:"master",t:"TDE MASTER"},
- {k:"master.perfiles",t:"TDE MASTER · PERFILES"},
- {k:"master.usuarios",t:"TDE MASTER · USUARIOS"}
+ {k:"master.perfiles",t:"TDE MASTER · PERFILES",p:"master"},
+ {k:"master.usuarios",t:"TDE MASTER · USUARIOS",p:"master"},
+ {k:"master.branding",t:"TDE MASTER · BRANDING",p:"master"},
+ {k:"master.seguimiento",t:"TDE MASTER · TDE SEGUIMIENTO MASTER",p:"master"}
 ];
 var PERFILES=[];
 function mset(t){$("mmsg").textContent=t}
+function permitido(k){
+ if(esMaster())return true;
+ var nodo=null;PERMISOS.forEach(function(x){if(x.k===k)nodo=x});
+ if(!nodo)return false;
+ var pm=(SESS&&SESS.permisos)||{};
+ if(!pm[k])return false;
+ if(nodo.p&&!pm[nodo.p])return false;
+ return true;
+}
+function mostrarEl(el,ok){if(el)el.style.display=ok?"":"none"}
+function aplicarPermisos(){
+ mostrarEl($("partner"),permitido("partnership"));
+ mostrarEl($("palta"),permitido("partnership.alta"));
+ mostrarEl($("pseg"),permitido("partnership.seguimiento"));
+ mostrarEl($("tmaster"),permitido("master"));
+ mostrarEl(document.querySelector('.tab[data-t="perf"]'),permitido("master.perfiles"));
+ mostrarEl(document.querySelector('.tab[data-t="usr"]'),permitido("master.usuarios"));
+ mostrarEl($("tbrand"),permitido("master.branding"));
+ mostrarEl($("tseg"),permitido("master.seguimiento"));
+}
+function primeraTabPermitida(){
+ var orden=[["perf","master.perfiles"],["usr","master.usuarios"],["brand","master.branding"],["seg","master.seguimiento"]];
+ for(var i=0;i<orden.length;i++){if(permitido(orden[i][1]))return orden[i][0]}
+ return "perf";
+}
+function refrescarPermisos(){
+ aplicarPermisos();
+ if(!sessOk())return Promise.resolve();
+ return rpc("mis_permisos",{p_token:tok()}).then(function(pm){
+  if(!sessOk())return;
+  SESS.permisos=pm||{};saveSess(SESS);aplicarPermisos();
+ }).catch(function(){aplicarPermisos()});
+}
 function showTab(t){
  document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("on",b.getAttribute("data-t")===t)});
  $("tab-perf").hidden=t!=="perf";$("tab-usr").hidden=t!=="usr";
@@ -1143,7 +1209,7 @@ function renderMaster(){
 }
 function openMaster(volviendo){
  if(volviendo)setVista("mastermode");else irVista("mastermode");
- showTab("perf");renderMaster();loadMaster();
+ showTab(primeraTabPermitida());renderMaster();loadMaster();
 }
 function loadMaster(){return loadPerfiles().then(loadUsuarios)}
 
@@ -1709,7 +1775,8 @@ $("pcrear").onclick=crearPerfil;
 $("ucrear").onclick=function(){if(editId)modificarUsuario();else crearUsuario()};
 $("uperfil").onchange=function(){var p=perfilSel();$("ufirma").value=p&&p.firma?p.firma:""};
 document.querySelectorAll(".tab").forEach(function(b){b.onclick=function(){showTab(b.getAttribute("data-t"))}});
-$("tseg").onclick=function(){irVista("kanmode");loadKan()};
+$("tseg").onclick=function(){abrirSeguimiento("master")};
+$("kpart").onchange=function(){paintKan()};
 buildPermChecks();
 
 
@@ -1785,7 +1852,7 @@ function lockApp(){
   accMsg("");accSub("");accDots(3);
   setTimeout(function(){ge("acPerfil").focus()},50);
 }
-function unlockApp(){document.body.classList.remove("locked");ge("acc").hidden=true;VISTAS=[];setVista("viewfun")}
+function unlockApp(){document.body.classList.remove("locked");ge("acc").hidden=true;VISTAS=[];setVista("viewfun");refrescarPermisos()}
 window.lockApp=lockApp;
 function enviarAcceso(){
   if(ACCG.busy||ACCG.until>Date.now())return;
