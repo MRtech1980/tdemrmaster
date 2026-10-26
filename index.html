@@ -191,6 +191,8 @@ body.brandmode .wrap{max-width:1400px}
 #brand .bdat{display:block;font-size:14px;font-weight:700;color:#14231a;margin-top:4px}
 #brand .bidin{font-weight:700;font-size:14px;color:#0b1f14;background:linear-gradient(135deg,#ffffff 0%,var(--c) 100%);border:1px solid var(--c);border-radius:6px;padding:6px 8px;box-sizing:border-box;width:100%;max-width:160px}
 #brand .bdias{font-size:14px;font-weight:700;margin-top:6px}
+#brand .bdiasdet{display:flex;flex-direction:column;gap:2px;margin-top:4px;padding-top:6px;border-top:1px dashed #9bb5a3}
+#brand .bdiasdet .bdat{font-size:12px;color:#33493b}
 #brand .bfin{background:#0b1f14;color:#39ff14;padding:4px 8px;border-radius:6px;text-shadow:0 0 6px rgba(57,255,20,.7);letter-spacing:.04em}
 #brand .bgrip{cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;background:#eef6f0;border:1px solid #9bb5a3;border-radius:8px;padding:4px 8px;font-size:.8rem;color:#14231a;white-space:nowrap;flex:none}
 #brand .bgrip:active{cursor:grabbing}
@@ -1303,10 +1305,15 @@ function bNivel(d){return d>=5?"rojo":d>=3?"amarillo":"verde"}
 var BDIAS_COL={verde:["#15803d","#4ade80"],amarillo:["#a16207","#facc15"],rojo:["#b91c1c","#f87171"]};
 function bCard(r,s){
  var d=bCardBase(r,s);
- var n=bDias(r),nv=bNivel(n);
+ var n=bDias(r),nv=bNivel(n),f=new Date(r.creado_en),h=new Date();
  var dd=document.createElement("div");dd.className="bdias";dd.style.color=BDIAS_COL[nv][0];
  dd.textContent="Días de respuesta: "+n;
- d.appendChild(dd);
+ var det=document.createElement("div");det.className="bdiasdet";
+ var fi=isNaN(f)?"—":f.toLocaleDateString("es-AR"),ha=h.toLocaleDateString("es-AR");
+ var txt={verde:"Verde (menos de 3 días)",amarillo:"Amarillo (de 3 a 5 días)",rojo:"Rojo (5 días o más)"}[nv];
+ det.appendChild(bDato("Ingreso: "+fi+" · Cálculo al: "+ha));
+ det.appendChild(bDato("Nivel: "+txt));
+ d.appendChild(dd);d.appendChild(det);
  return d;
 }
 function bCardBase(r,s){
