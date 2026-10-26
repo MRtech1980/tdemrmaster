@@ -133,7 +133,17 @@ body.kanmode .wrap{max-width:1400px}
 .col.over{outline:3px dashed var(--c);outline-offset:-3px}
 body.dragging-any{user-select:none;-webkit-user-select:none}
 .funrow{display:flex;flex-wrap:wrap;gap:10px}
-.funrow #partner,.funrow #tmaster{flex:1 1 200px;width:auto;margin:10px 0 0}
+.funrow #partner,.funrow #tmaster,.funrow #palta,.funrow #pseg{flex:1 1 200px;width:auto;margin:10px 0 0}
+/* Vistas: FUNCIONALIDADES → TDE PARTNERSHIP (ALTA CLIENTE / SEGUIMIENTO) · TDE MASTER */
+#partnerMenu{display:none}
+#vback{display:none}
+body.viewfun .hero,body.viewfun .intro,body.viewfun #app>:not(#funBlock){display:none!important}
+body.viewfun .wrap,body.viewpartner .wrap{max-width:720px}
+body.viewpartner .hero,body.viewpartner .intro,body.viewpartner #app>:not(#partnerMenu){display:none!important}
+body.viewpartner #partnerMenu{display:block}
+body.viewalta #funBlock,body.viewalta #partnerMenu,body.viewalta #kan,body.viewalta #brand,body.viewalta #master{display:none!important}
+body.viewalta .wrap{max-width:720px}
+body.viewalta #vback,body.viewpartner #vback{display:inline-block;margin:0 0 10px}
 /* TDE MASTER: perfiles y usuarios */
 #master{display:none}
 body.mastermode #master{display:block}
@@ -297,6 +307,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 
 <main class="wrap">
 
+<button type="button" id="vback" class="btn sec">← Volver</button>
 <img class="hero fv" src="header.png" alt="Multisistema · TDE · Ingresa tus datos / Identidad" width="1448" height="1086">
 
 <section class="intro fv">
@@ -416,13 +427,20 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <div id="pend" role="alert" hidden></div>
 </form>
 
-<fieldset class="fv">
+<fieldset class="fv" id="funBlock">
 <div class="sh">Funcionalidades</div>
 <div class="funrow">
 <button type="button" id="partner">TDE PARTNERSHIP</button>
 <button type="button" id="tmaster">TDE MASTER</button>
 </div>
 <p class="note">Seguimiento de cada TDE por etapas, con sus procedimientos y colores.</p>
+</fieldset>
+<fieldset id="partnerMenu">
+<div class="sh">TDE PARTNERSHIP</div>
+<div class="funrow">
+<button type="button" id="palta">TDE ALTA CLIENTE</button>
+<button type="button" id="pseg">TDE SEGUIMIENTO</button>
+</div>
 </fieldset>
 
 <div class="gowrap" hidden>
@@ -443,7 +461,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 
 <section id="kan">
 <div class="kanhead">
-<button type="button" id="kback" class="btn sec">← Volver al formulario</button>
+<button type="button" id="kback" class="btn sec">← Volver</button>
 <h2>TDE PARTNERSHIP</h2>
 <button type="button" id="kref" class="btn sec">Actualizar</button>
 <p id="kmsg" role="status"></p>
@@ -493,7 +511,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 </section>
 <section id="master">
 <div class="kanhead">
-<button type="button" id="mback" class="btn sec">← Volver al formulario</button>
+<button type="button" id="mback" class="btn sec">← Volver</button>
 <h2>TDE MASTER · Perfiles y usuarios</h2>
 <div id="mauth"></div>
 <p id="mmsg" role="status"></p>
@@ -514,6 +532,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <button type="button" class="tab on" data-t="perf">PERFILES</button>
 <button type="button" class="tab" data-t="usr">USUARIOS</button>
 <button type="button" class="tab" id="tbrand" data-t="brand">BRANDING</button>
+<button type="button" class="tab" id="tseg" data-t="seg">TDE SEGUIMIENTO</button>
 </div>
 <div id="tab-perf">
 <div class="mform" id="pform">
@@ -1038,8 +1057,17 @@ function startDrag(e,r,i,el){
  window.addEventListener("pointercancel",end);
 }
 
-$("partner").onclick=function(){document.body.classList.add("kanmode");window.scrollTo(0,0);loadKan()};
-$("kback").onclick=function(){document.body.classList.remove("kanmode");window.scrollTo(0,0)};
+var VISTAS_LISTA=["viewfun","viewpartner","viewalta","kanmode","mastermode","brandmode"];
+var VISTAS=[];
+function vistaActual(){for(var i=0;i<VISTAS_LISTA.length;i++){if(document.body.classList.contains(VISTAS_LISTA[i]))return VISTAS_LISTA[i]}return "viewfun"}
+function setVista(v){VISTAS_LISTA.forEach(function(c){document.body.classList.remove(c)});document.body.classList.add(v);window.scrollTo(0,0)}
+function irVista(v){var c=vistaActual();if(c!==v)VISTAS.push(c);setVista(v)}
+function volverVista(){setVista(VISTAS.pop()||"viewfun")}
+$("partner").onclick=function(){irVista("viewpartner")};
+$("palta").onclick=function(){irVista("viewalta")};
+$("pseg").onclick=function(){irVista("kanmode");loadKan()};
+$("vback").onclick=function(){volverVista()};
+$("kback").onclick=function(){volverVista()};
 $("kref").onclick=function(){loadKan()};
 
 // ---- TDE MASTER: perfiles y usuarios ----
@@ -1087,8 +1115,8 @@ function renderMaster(){
  var m=esMaster();
  $("pform").hidden=!m;$("uform").hidden=!m;
 }
-function openMaster(){
- document.body.classList.add("mastermode");window.scrollTo(0,0);
+function openMaster(volviendo){
+ if(volviendo)setVista("mastermode");else irVista("mastermode");
  showTab("perf");renderMaster();loadMaster();
 }
 function loadMaster(){return loadPerfiles().then(loadUsuarios)}
@@ -1210,7 +1238,7 @@ function delUsuario(id){
 }
 
 // ---- Eventos ----
-$("tmaster").onclick=openMaster;
+$("tmaster").onclick=function(){openMaster()};
 
 // ---- BRANDING: ALTA TDE → DATA INICIAL → DESARROLLO → FINALIZADO ----
 var BSTAGES=["ALTA TDE","DATA INICIAL","DESARROLLO","FINALIZADO"],BCOLOR=["#38bdf8","#f5c400","#e53935","#2ecc71"],BWA="5492616576239",BNUM="+5492616576239",bRecs=[],bEditing={};
@@ -1525,7 +1553,7 @@ function bZip(r,final){
 }
 function openBrand(){
  if(!esMaster()){mset("Solo el perfil MASTER puede ver BRANDING.");return}
- document.body.classList.remove("mastermode");document.body.classList.add("brandmode");window.scrollTo(0,0);
+ irVista("brandmode");
  bLoad().then(bAlertaDias);
 }
 /* Cartel al ingresar: TDE en amarillo (3 a 5 días) o rojo (5 días o más), que no estén finalizadas */
@@ -1568,7 +1596,7 @@ function bAlertaDias(){
  ov.appendChild(box);document.body.appendChild(ov);
 }
 $("tbrand").addEventListener("click",openBrand);
-$("bback").onclick=function(){document.body.classList.remove("brandmode");openMaster()};
+$("bback").onclick=function(){VISTAS.pop();openMaster(true)};
 $("bregresar").onclick=$("bback").onclick;
 $("bf_save").onclick=bGuardarFicha;
 $("bref").onclick=function(){bLoad()};
@@ -1628,11 +1656,12 @@ function cyLogin(){
 $("cy_go").onclick=cyLogin;
 $("cy_u").onkeydown=function(e){if(e.key==="Enter")$("cy_p").focus()};
 $("cy_p").onkeydown=function(e){if(e.key==="Enter")cyLogin()};
-$("mback").onclick=function(){document.body.classList.remove("mastermode");window.scrollTo(0,0)};
+$("mback").onclick=function(){volverVista()};
 $("pcrear").onclick=crearPerfil;
 $("ucrear").onclick=function(){if(editId)modificarUsuario();else crearUsuario()};
 $("uperfil").onchange=function(){var p=perfilSel();$("ufirma").value=p&&p.firma?p.firma:""};
 document.querySelectorAll(".tab").forEach(function(b){b.onclick=function(){showTab(b.getAttribute("data-t"))}});
+$("tseg").onclick=function(){irVista("kanmode");loadKan()};
 buildPermChecks();
 
 
@@ -1699,7 +1728,7 @@ function lockApp(){
   accMsg("");accSub("");accDots(3);
   setTimeout(function(){ge("acPerfil").focus()},50);
 }
-function unlockApp(){document.body.classList.remove("locked");ge("acc").hidden=true}
+function unlockApp(){document.body.classList.remove("locked");ge("acc").hidden=true;VISTAS=[];setVista("viewfun")}
 window.lockApp=lockApp;
 function enviarAcceso(){
   if(ACCG.busy||ACCG.until>Date.now())return;
