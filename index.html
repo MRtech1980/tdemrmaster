@@ -298,7 +298,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
   </div>
   <h1 class="acT" id="acTit">ACCESO CIFRADO TDE MASTER</h1>
   <label>PERFIL<small>Distingue mayúsculas y minúsculas</small>
-    <input id="acPerfil" name="perfil" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+    <select id="acPerfil" name="perfil"><option value="">— Elegí un perfil —</option></select></label>
   <label>USUARIO<small>Distingue mayúsculas y minúsculas</small>
     <input id="acU" name="usuario" autocomplete="username" autocapitalize="none" spellcheck="false"></label>
   <label>CLAVE<small>Distingue mayúsculas y minúsculas</small>
@@ -1166,6 +1166,7 @@ function loadPerfiles(){
    var f=document.createElement("small");f.textContent="Firma: "+(x.firma||"—")+" · Responsable: "+(x.responsable||"—");
    var pr=document.createElement("pre");pr.textContent=textoPermisos(x.permisos);
    d.appendChild(b);d.appendChild(f);d.appendChild(pr);
+   if(esMaster())d.appendChild(btn("MODIFICAR","sec",function(){cargarPerfilEdit(x)}));
    if(esMaster()&&x.nombre!=="MASTER")d.appendChild(btn("Eliminar","danger",function(){delPerfil(x.id)}));
    box.appendChild(d);
   });
@@ -1175,10 +1176,31 @@ function loadPerfiles(){
   sel.value=prev;
  }).catch(function(e){mset("No se pudo leer los perfiles: "+errTxt(e))});
 }
+var PERFIL_EDIT=null;
+function cargarPerfilEdit(x){
+ PERFIL_EDIT=x;
+ $("pnom").value=x.nombre||"";$("pfirma").value=x.firma||"";$("presp").value=x.responsable||"";
+ buildPermChecks();
+ var pm=x.permisos||{};
+ document.querySelectorAll("#pperm input").forEach(function(cb){cb.checked=!!pm[cb.value]});
+ $("pcrear").textContent="Guardar cambios";
+ mset("Modificando perfil: "+x.nombre);
+ $("pnom").focus();
+}
+function cancelarEdicionPerfil(){
+ PERFIL_EDIT=null;$("pcrear").textContent="Guardar perfil";
+}
 function crearPerfil(){
  if(!esMaster()){mset("Solo el perfil MASTER puede crear perfiles.");return}
  var nombre=$("pnom").value.trim();
  if(!nombre){mset("Escribí el nombre del perfil.");return}
+ if(PERFIL_EDIT){
+  mset("Guardando cambios…");
+  rpc("modificar_perfil",{p_token:tok(),p_id:PERFIL_EDIT.id,p_nombre:nombre,p_firma:$("pfirma").value.trim(),p_responsable:$("presp").value.trim(),p_permisos:permisosSel()})
+   .then(function(){cancelarEdicionPerfil();$("pnom").value="";$("pfirma").value="";$("presp").value="";buildPermChecks();mset("Perfil modificado.");return loadPerfiles()})
+   .catch(function(e){mset("No se pudo modificar el perfil: "+errTxt(e))});
+  return;
+ }
  mset("Guardando perfil…");
  rpc("crear_perfil",{p_token:tok(),p_nombre:nombre,p_firma:$("pfirma").value.trim(),p_responsable:$("presp").value.trim(),p_permisos:permisosSel()})
   .then(function(){$("pnom").value="";$("pfirma").value="";$("presp").value="";buildPermChecks();mset("Perfil guardado.");return loadPerfiles()})
@@ -1747,8 +1769,17 @@ function accBloquear(seg){
   accDots(0);accBloqueo();
   if(!ACCG.tick)ACCG.tick=setInterval(accBloqueo,1000);
 }
+function cargarPerfilesAcceso(){
+  return rpc("listar_perfiles_acceso",{}).then(function(list){
+    var sel=ge("acPerfil"),prev=sel.value;
+    sel.innerHTML='<option value="">— Elegí un perfil —</option>';
+    (list||[]).forEach(function(x){var o=document.createElement("option");o.value=x.nombre;o.textContent=x.nombre;sel.appendChild(o)});
+    sel.value=prev;
+  }).catch(function(){});
+}
 function lockApp(){
   document.body.classList.add("locked");
+  cargarPerfilesAcceso();
   var a=ge("acc");a.hidden=false;
   ge("acU").value="";ge("acP").value="";ge("acPerfil").value="";
   accMsg("");accSub("");accDots(3);
@@ -1776,6 +1807,7 @@ function enviarAcceso(){
   });
 }
 ge("acBtn").addEventListener("click",enviarAcceso);
+cargarPerfilesAcceso();
 ["acPerfil","acU","acP"].forEach(function(id){ge(id).addEventListener("keydown",function(ev){if(ev.key==="Enter"){ev.preventDefault();enviarAcceso()}})});
 (function(){
   var sp=ge("splash"),cont=ge("sparks");
