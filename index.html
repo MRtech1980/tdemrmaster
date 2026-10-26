@@ -1331,12 +1331,16 @@ function loadUsuarios(){
   var wrap=document.createElement("div");wrap.className="uwrap";
   var t=document.createElement("table");t.className="utab";
   var hd=document.createElement("thead"),hr=document.createElement("tr");
-  ["PERFIL","FIRMA","NOMBRE","APELLIDO","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===4)th.colSpan=2;hr.appendChild(th)});
+  ["PERFIL","LOGO","FIRMA","NOMBRE","APELLIDO","OPCIONES"].forEach(function(h,i){var th=document.createElement("th");th.textContent=h;if(i===5)th.colSpan=2;hr.appendChild(th)});
   hd.appendChild(hr);t.appendChild(hd);
   var tb=document.createElement("tbody");
   list.forEach(function(x){
    var tr=document.createElement("tr");
-   [x.perfil_nombre,x.firma,x.nombre,x.apellido].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
+   var tdP=document.createElement("td");tdP.textContent=x.perfil_nombre||"—";tr.appendChild(tdP);
+   var tdL=document.createElement("td");
+   if(x.logo){var im=document.createElement("img");im.src=x.logo;im.alt="Logo";im.style.cssText="height:40px;max-width:120px;object-fit:contain";tdL.appendChild(im)}else{tdL.textContent="—"}
+   tr.appendChild(tdL);
+   [x.firma,x.nombre,x.apellido].forEach(function(v){var td=document.createElement("td");td.textContent=v||"—";tr.appendChild(td)});
    var t1=document.createElement("td");t1.appendChild(btn("Modificar","sec",function(){editarUsuario(x)}));tr.appendChild(t1);
    var t2=document.createElement("td");if(x.usuario!=="MRTech")t2.appendChild(btn("Eliminar","danger",function(){delUsuario(x.id)}));tr.appendChild(t2);
    tb.appendChild(tr);
