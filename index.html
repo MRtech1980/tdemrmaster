@@ -235,6 +235,18 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 .pchk{margin:4px 0 10px;padding:10px 12px;border:1px dashed var(--bdl);border-radius:10px;background:#ffffff}
 .pchk>b{display:block;color:var(--head);font-family:Montserrat,system-ui,sans-serif;font-size:.9rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
 #plist pre,#ulist pre{font-size:.78rem;max-height:none}
+#master .mtop{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin:0 0 8px;padding:6px 0 10px;border-bottom:1px solid #d6e6db}
+#master .mtop h2{margin:0;text-align:center;font-size:1.4rem;white-space:nowrap}
+#master .mtopR{justify-self:end;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+#master .mUser{font-size:.85rem;text-align:right;line-height:1.25;font-weight:700}
+@media (max-width:760px){#master .mtop{grid-template-columns:1fr}#master .mtop>div:first-child{display:none}#master .mtop h2,#master .mtopR{justify-self:center;justify-content:center;text-align:center}#master .mUser{text-align:center}}
+#plist .uwrap{width:100%;overflow-x:auto;border:1px solid #d6e6db;border-radius:12px;background:#fff;margin-top:8px}
+#plist .utab{width:100%;border-collapse:collapse}
+#plist .utab th,#plist .utab td{padding:8px 10px;border-bottom:1px solid #e3eee6;vertical-align:top;text-align:left}
+.pchecks{list-style:none;margin:0;padding:0;columns:2;column-gap:14px;font-size:.82rem}
+.pchecks li{break-inside:avoid;padding:1px 0}
+.pchecks .si{color:#0d6b2a;font-weight:700}
+.pchecks .no{color:#8aa096}
 #ulist .uwrap{width:100%;overflow-x:auto;border:1px solid #d6e6db;border-radius:12px;background:#fff;margin-top:8px}
 #ulist .utab{width:100%;min-width:620px;border-collapse:collapse;font-size:.9rem}
 #ulist .utab th{background:#0b3d1f;color:#e9fff1;text-align:left;padding:10px 12px;font-size:.78rem;letter-spacing:.06em;white-space:nowrap}
@@ -530,9 +542,10 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 </div>
 </section>
 <section id="master">
-<div class="kanhead">
-<button type="button" id="mback" class="btn sec">← Volver</button>
-<h2>TDE MASTER · Perfiles y usuarios</h2>
+<div class="kanhead mtop">
+<div></div>
+<h2>TDE MASTER</h2>
+<div class="mtopR"><div id="mUser" class="mUser"></div><button type="button" id="mback" class="btn sec">REGRESAR</button></div>
 <div id="mauth"></div>
 <p id="mmsg" role="status"></p>
 <div id="cyber" hidden>
@@ -1249,6 +1262,7 @@ function perfilSel(){
 }
 function renderMaster(){
  var ok=sessOk();
+ $("mUser").textContent=ok?[SESS.firma,((SESS.nombre||"")+" "+(SESS.apellido||"")).trim()].filter(Boolean).join(" · "):"";
  document.body.classList.toggle("mlock",!ok);
  $("cyber").hidden=ok;
  if(ok){renderLoginBox($("mauth"),$("mmsg"),function(){renderMaster();loadMaster()})}
@@ -1275,16 +1289,26 @@ function loadPerfiles(){
   list=list||[];PERFILES=list;
   box.innerHTML="";
   if(!list.length){var p=document.createElement("p");p.className="note";p.textContent="Todavía no hay perfiles guardados.";box.appendChild(p)}
-  list.forEach(function(x){
-   var d=document.createElement("div");d.className="item";
-   var b=document.createElement("b");b.textContent=x.nombre;
-   
-   var pr=document.createElement("pre");pr.textContent=textoPermisos(x.permisos);
-   d.appendChild(b);d.appendChild(pr);
-   if(esMaster())d.appendChild(btn("MODIFICAR","sec",function(){cargarPerfilEdit(x)}));
-   if(esMaster()&&x.nombre!=="MASTER")d.appendChild(btn("Eliminar","danger",function(){delPerfil(x.id)}));
-   box.appendChild(d);
-  });
+  if(list.length){
+   var wrap=document.createElement("div");wrap.className="uwrap";
+   var t=document.createElement("table");t.className="utab";
+   var hd=document.createElement("thead"),hr=document.createElement("tr");
+   ["PERFIL","TDE APLICADOS (check list)","ACCIONES"].forEach(function(h,k){var th=document.createElement("th");th.textContent=h;if(k===2)th.colSpan=2;hr.appendChild(th)});
+   hd.appendChild(hr);t.appendChild(hd);
+   var tb=document.createElement("tbody");
+   list.forEach(function(x){
+    var tr=document.createElement("tr");
+    var t1=document.createElement("td");t1.textContent=x.nombre;t1.style.fontWeight="800";tr.appendChild(t1);
+    var t2=document.createElement("td");var ul=document.createElement("ul");ul.className="pchecks";
+    var pm=x.permisos||{};
+    PERMISOS.forEach(function(q){var li=document.createElement("li");li.className=pm[q.k]?"si":"no";li.textContent=(pm[q.k]?"☑ ":"☐ ")+q.t;ul.appendChild(li)});
+    t2.appendChild(ul);tr.appendChild(t2);
+    var t3=document.createElement("td");if(esMaster())t3.appendChild(btn("MODIFICAR","sec",function(){cargarPerfilEdit(x)}));tr.appendChild(t3);
+    var t4=document.createElement("td");if(esMaster()&&x.nombre!=="MASTER")t4.appendChild(btn("ELIMINAR","danger",function(){delPerfil(x.id)}));tr.appendChild(t4);
+    tb.appendChild(tr);
+   });
+   t.appendChild(tb);wrap.appendChild(t);box.appendChild(wrap);
+  }
   var sel=$("uperfil"),prev=sel.value;
   sel.innerHTML='<option value="">— Elegí un perfil —</option>';
   list.forEach(function(x){var o=document.createElement("option");o.value=x.id;o.textContent=x.nombre;sel.appendChild(o)});
