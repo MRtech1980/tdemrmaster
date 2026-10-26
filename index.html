@@ -143,6 +143,7 @@ body.viewpartner .hero,body.viewpartner .intro,body.viewpartner #app>:not(#partn
 body.viewpartner #partnerMenu{display:block}
 body.viewalta #funBlock,body.viewalta #partnerMenu,body.viewalta #kan,body.viewalta #brand,body.viewalta #master{display:none!important}
 body.viewalta .wrap{max-width:720px}
+body.viewalta .hero{display:none!important}
 body.viewalta #vback,body.viewpartner #vback{display:inline-block;margin:0 0 10px}
 /* TDE MASTER: perfiles y usuarios */
 #master{display:none}
@@ -311,7 +312,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <img class="hero fv" src="header.png" alt="Multisistema · TDE · Ingresa tus datos / Identidad" width="1448" height="1086">
 
 <section class="intro fv">
-<h1>MULTISISTEMA · Gabriel D'Amico</h1>
+<h1 id="cabTit">PARTNERSHIP</h1>
 <label for="notif">Celu que recibirá la notificación por WhatsApp de la TDE generada</label>
 <input type="tel" id="notif" value="+5493425040582" inputmode="tel" autocomplete="off">
 <p class="dest">La notificación se envía por WhatsApp a este número al tocar GENERAR.</p>
@@ -883,7 +884,7 @@ function login(usuario,clave){
     var er=new Error(j.error==="bloqueado"?"Demasiados intentos. Esperá "+j.segundos+" segundos.":"Usuario o clave incorrectos.");
     er.code=j.error;er.segundos=j.segundos;er.restantes=j.restantes;er.ultimo=j.ultimo;throw er;
    }
-   saveSess({token:j.token,usuario:j.usuario,email:j.usuario,perfil:j.perfil,firma:j.firma,exp:Date.now()+8*3600*1000});
+   saveSess({token:j.token,usuario:j.usuario,email:j.usuario,perfil:j.perfil,firma:j.firma,nombre:j.nombre||"",apellido:j.apellido||"",exp:Date.now()+8*3600*1000});
    return SESS;
   })});
 }
@@ -1060,7 +1061,12 @@ function startDrag(e,r,i,el){
 var VISTAS_LISTA=["viewfun","viewpartner","viewalta","kanmode","mastermode","brandmode"];
 var VISTAS=[];
 function vistaActual(){for(var i=0;i<VISTAS_LISTA.length;i++){if(document.body.classList.contains(VISTAS_LISTA[i]))return VISTAS_LISTA[i]}return "viewfun"}
-function setVista(v){VISTAS_LISTA.forEach(function(c){document.body.classList.remove(c)});document.body.classList.add(v);window.scrollTo(0,0)}
+function pintarCabecera(){
+ var nom=((SESS&&SESS.nombre)||"")+" "+((SESS&&SESS.apellido)||"");nom=nom.trim();
+ var firma=(SESS&&SESS.firma)||"PARTNERSHIP";
+ $("cabTit").textContent=nom?firma+" · "+nom:firma;
+}
+function setVista(v){VISTAS_LISTA.forEach(function(c){document.body.classList.remove(c)});document.body.classList.add(v);window.scrollTo(0,0);if(v==="viewalta")pintarCabecera()}
 function irVista(v){var c=vistaActual();if(c!==v)VISTAS.push(c);setVista(v)}
 function volverVista(){setVista(VISTAS.pop()||"viewfun")}
 $("partner").onclick=function(){irVista("viewpartner")};
