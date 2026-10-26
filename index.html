@@ -158,7 +158,12 @@ body.viewalta #vback,body.viewpartner #vback{display:inline-block;margin:0 0 10p
 body.mastermode #master{display:block}
 body.mastermode .fv{display:none!important}
 body.mastermode #app>:not(#master){display:none!important}
-body.mastermode .wrap{max-width:720px}
+body.mastermode .wrap{max-width:1180px}
+.mlayout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:18px;align-items:start}
+.mside{position:sticky;top:12px;display:flex;flex-direction:column;gap:10px}
+.mside .tab{flex:none;width:100%;text-align:left;padding:14px 18px;font-size:.92rem}
+.mmain{min-width:0}
+@media (max-width:760px){.mlayout{grid-template-columns:1fr}.mside{position:static;flex-direction:row;flex-wrap:wrap}.mside .tab{flex:1 1 auto;width:auto;text-align:center}}
 #mauth{width:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 #mauth:empty{display:none}
 #mauth span{width:100%;font-size:.85rem;color:var(--ink2)}
@@ -218,7 +223,7 @@ body.brandmode .wrap{max-width:1400px}
 #brand .bcol.drop{outline:2px dashed #ffffff;outline-offset:-6px}
 
 
-body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,body.mlock #master #plist,body.mlock #master #ulist,body.mlock #master #tab-usr,body.mlock #master #tab-perf{display:none!important}
+body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,body.mlock #master #plist,body.mlock #master #ulist,body.mlock #master #tab-usr,body.mlock #master #tab-perf{display:none!important}
 .tabs{display:flex;gap:8px;margin:0 0 12px}
 .tab{flex:1;font:inherit;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:12px;border-radius:999px;border:1.5px solid var(--head);background:#ffffff;color:var(--head);cursor:pointer}
 .tab.on{background:var(--head);color:#ffffff}
@@ -543,12 +548,14 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
  <div id="cy_det" class="cy-det" hidden></div>
 </div>
 </div>
-<div class="tabs">
+<div class="mlayout">
+<aside class="mside">
 <button type="button" class="tab on" data-t="perf">PERFILES</button>
 <button type="button" class="tab" data-t="usr">USUARIOS</button>
 <button type="button" class="tab" id="tbrand" data-t="brand">BRANDING</button>
 <button type="button" class="tab" id="tseg" data-t="seg">TDE SEGUIMIENTO MASTER</button>
-</div>
+</aside>
+<div class="mmain">
 <div id="tab-perf">
 <div class="mform" id="pform">
 <label>Nombre del perfil<input type="text" id="pnom" placeholder="Ej: Administrador"></label>
@@ -569,6 +576,8 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <button type="button" id="ucrear" class="btn">Crear usuario</button>
 </div>
 <div id="ulist"></div>
+</div>
+</div>
 </div>
 </section>
 
