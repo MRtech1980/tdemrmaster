@@ -83,8 +83,8 @@ pre.ficha.open{display:block}
 .note{font-size:.88rem;color:var(--ink2)}
 #gmsg,#smsg{font-weight:600;color:var(--ok);min-height:1.4em;margin-top:6px}
 #pend .ok{background:#ecfbf1;border:2px solid var(--ok);border-radius:12px;padding:12px 14px;color:#0d4a24;font-size:.92rem;font-weight:600}
-#partner,#tmaster{display:block;width:100%;border-radius:999px;padding:16px 24px;cursor:pointer;font:inherit;font-weight:800;font-size:1.05rem;letter-spacing:3px;color:#ffffff;border:0;background:linear-gradient(90deg,#052a12,#0d6b2a 55%,#1f9e47);box-shadow:0 6px 18px rgba(0,0,0,.35);margin:10px 0 0}
-#partner:hover{filter:brightness(1.12)}
+#partner,#tmaster,#palta,#pseg{display:block;width:100%;border-radius:999px;padding:16px 24px;cursor:pointer;font:inherit;font-weight:800;font-size:1.05rem;letter-spacing:3px;color:#ffffff;border:0;background:linear-gradient(90deg,#052a12,#0d6b2a 55%,#1f9e47);box-shadow:0 6px 18px rgba(0,0,0,.35);margin:10px 0 0}
+#partner:hover,#tmaster:hover,#palta:hover,#pseg:hover{filter:brightness(1.12)}
 /* TDE PARTNERSHIP: tablero Kanban horizontal */
 #kan{display:none}
 body.kanmode #kan{display:block}
@@ -137,9 +137,15 @@ body.dragging-any{user-select:none;-webkit-user-select:none}
 /* Vistas: FUNCIONALIDADES → TDE PARTNERSHIP (ALTA CLIENTE / SEGUIMIENTO) · TDE MASTER */
 #partnerMenu{display:none}
 #vback{display:none}
-body.viewfun .hero,body.viewfun .intro,body.viewfun #app>:not(#funBlock){display:none!important}
+.cab{text-align:center;margin:0 0 12px}
+.cabLogo{min-height:120px;display:flex;align-items:center;justify-content:center;padding:10px}
+#cabLogoImg{max-height:120px;max-width:70%;height:auto;width:auto}
+#cabFirma{font-family:Montserrat,system-ui,sans-serif;font-weight:800;font-size:1.6rem;letter-spacing:.06em;color:#0d6b2a}
+.cabLey{margin-top:6px;font-family:Montserrat,system-ui,sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:.08em;color:#ffffff;background:linear-gradient(90deg,#052a12,#0d6b2a 55%,#1f9e47);border-radius:999px;padding:10px 18px}
+#fregresar{margin:14px 0 6px}
+body.viewfun .hero,body.viewfun .intro,body.viewfun .cab,body.viewfun #app>:not(#funBlock){display:none!important}
 body.viewfun .wrap,body.viewpartner .wrap{max-width:720px}
-body.viewpartner .hero,body.viewpartner .intro,body.viewpartner #app>:not(#partnerMenu){display:none!important}
+body.viewpartner .hero,body.viewpartner .intro,body.viewpartner .cab,body.viewpartner #app>:not(#partnerMenu){display:none!important}
 body.viewpartner #partnerMenu{display:block}
 body.viewalta #funBlock,body.viewalta #partnerMenu,body.viewalta #kan,body.viewalta #brand,body.viewalta #master{display:none!important}
 body.viewalta .wrap{max-width:720px}
@@ -311,6 +317,10 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <button type="button" id="vback" class="btn sec">← Volver</button>
 <img class="hero fv" src="header.png" alt="Multisistema · TDE · Ingresa tus datos / Identidad" width="1448" height="1086">
 
+<section class="cab fv" id="cabecera">
+<div class="cabLogo"><img id="cabLogoImg" alt="Logo" hidden><span id="cabFirma"></span></div>
+<div class="cabLey">FORMULARIO WEB - IDENTIDAD CLIENTE</div>
+</section>
 <section class="intro fv">
 <h1 id="cabTit">PARTNERSHIP</h1>
 <label for="notif">Celu que recibirá la notificación por WhatsApp de la TDE generada</label>
@@ -435,6 +445,7 @@ body.mlock #master .tabs,body.mlock #master #pform,body.mlock #master #uform,bod
 <button type="button" id="tmaster">TDE MASTER</button>
 </div>
 <p class="note">Seguimiento de cada TDE por etapas, con sus procedimientos y colores.</p>
+<button type="button" id="fregresar" class="btn sec">← REGRESAR</button>
 </fieldset>
 <fieldset id="partnerMenu">
 <div class="sh">TDE PARTNERSHIP</div>
@@ -1065,7 +1076,15 @@ function pintarCabecera(){
  var nom=((SESS&&SESS.nombre)||"")+" "+((SESS&&SESS.apellido)||"");nom=nom.trim();
  var firma=(SESS&&SESS.firma)||"PARTNERSHIP";
  $("cabTit").textContent=nom?firma+" · "+nom:firma;
+ $("cabFirma").textContent=firma;
 }
+$("logo").addEventListener("change",function(){
+ var f=this.files&&this.files[0];
+ if(!f){$("cabLogoImg").hidden=true;$("cabFirma").hidden=false;return}
+ var r=new FileReader();
+ r.onload=function(e){$("cabLogoImg").src=e.target.result;$("cabLogoImg").hidden=false;$("cabFirma").hidden=true};
+ r.readAsDataURL(f);
+});
 function setVista(v){VISTAS_LISTA.forEach(function(c){document.body.classList.remove(c)});document.body.classList.add(v);window.scrollTo(0,0);if(v==="viewalta")pintarCabecera()}
 function irVista(v){var c=vistaActual();if(c!==v)VISTAS.push(c);setVista(v)}
 function volverVista(){setVista(VISTAS.pop()||"viewfun")}
@@ -1073,6 +1092,7 @@ $("partner").onclick=function(){irVista("viewpartner")};
 $("palta").onclick=function(){irVista("viewalta")};
 $("pseg").onclick=function(){irVista("kanmode");loadKan()};
 $("vback").onclick=function(){volverVista()};
+$("fregresar").onclick=function(){saveSess(null);lockApp()};
 $("kback").onclick=function(){volverVista()};
 $("kref").onclick=function(){loadKan()};
 
