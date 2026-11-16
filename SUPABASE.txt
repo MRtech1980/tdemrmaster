@@ -1,2 +1,0 @@
-Project name: TDE - ALTA CLIENTES
-pass: ALTAclientesTDE
