@@ -258,11 +258,13 @@ body.mlock #master .mside,body.mlock #master #pform,body.mlock #master #uform,bo
 #ulist .utab tbody tr:hover td{background:#e8f5ec}
 #ulist .utab td .btn{margin:0;padding:6px 12px;font-size:.82rem;white-space:nowrap}
 /* Aviso para instalar el acceso directo */
-#inst{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:50;background:var(--panel);border:1px solid var(--bdl);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.45);padding:12px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;max-width:680px;margin:0 auto}
-#inst[hidden]{display:none}
-#inst p{margin:0;flex:1 1 220px;font-size:.92rem;color:var(--ink);font-weight:600}
-#inst .btn{font-size:.9rem;padding:10px 16px;white-space:nowrap}
-#inst .x{background:none;border:0;font:inherit;font-size:1.2rem;color:var(--ink2);cursor:pointer;padding:4px 8px}
+.instPop{position:fixed;inset:0;background:rgba(2,7,5,.72);display:flex;align-items:center;justify-content:center;z-index:60;padding:16px}
+.instPop[hidden]{display:none}
+.instCard{background:var(--panel);border:1px solid var(--bdl);border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,.45);padding:22px;max-width:380px;width:100%;text-align:center}
+.instCard h3{margin:0 0 8px;font-family:Montserrat,system-ui,sans-serif;font-weight:800;letter-spacing:.06em;color:var(--head)}
+.instCard p{margin:0 0 16px;font-size:1rem;color:var(--ink);font-weight:600}
+.instBtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.instBtns .btn{padding:10px 18px}
 /* ---- Acceso cifrado TDE MASTER ---- */
 .acc{position:fixed;inset:0;background:radial-gradient(ellipse at center,rgba(51,232,255,.22) 0%,rgba(51,232,255,0) 62%),#020b14;z-index:9999;display:flex;align-items:center;justify-content:center;overflow:auto;padding:24px 16px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#fff}
 .acc[hidden]{display:none!important}
@@ -1918,38 +1920,38 @@ buildPermChecks();
 
 // ---- Acceso directo (PWA): un toque lo descarga/instala ----
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+// ---- Acceso directo: aviso flotante después del ingreso ----
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.TDE_INSTALL=e});
+window.addEventListener("appinstalled",function(){window.TDE_INSTALL=null});
+function esAppInstalada(){return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true}
+function mostrarAvisoInstalar(){
+ if(esAppInstalada())return;
+ var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+ if(ios){
+  $("instTxt").textContent="¿Desea crear un acceso directo en su dispositivo? Tocá Compartir y luego “Agregar a pantalla de inicio”.";
+  $("instSi").hidden=true;
+ }else if(window.TDE_INSTALL){
+  $("instTxt").textContent="¿Desea crear un acceso directo en su dispositivo?";
+  $("instSi").hidden=false;
+ }else return;
+ $("instPop").hidden=false;
+}
 document.addEventListener("DOMContentLoaded",function(){
- var box=$("inst"),txt=$("inst_txt"),btn=$("inst_btn"),deferred=null;
- var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;
- var dismissed=false;try{dismissed=sessionStorage.getItem("tde_inst_ok")==="1"}catch(e){}
- if(standalone||dismissed)return;
- var ua=navigator.userAgent;
- var ios=/iPhone|iPad|iPod/.test(ua);
- // Solo instalación nativa del navegador (Chrome/Edge en Android y PC): crea el icono directamente
- window.addEventListener("beforeinstallprompt",function(e){
-  e.preventDefault();deferred=e;
-  box.hidden=false;txt.textContent="Instalá el acceso directo de TDE MASTER.";btn.hidden=false;
- });
- window.addEventListener("appinstalled",function(){box.hidden=true;deferred=null});
- btn.onclick=function(){
-  if(!deferred)return;
-  deferred.prompt();
-  deferred.userChoice.then(function(){deferred=null;box.hidden=true}).catch(function(){});
+ $("instNo").onclick=function(){$("instPop").hidden=true};
+ $("instSi").onclick=function(){
+  var ev=window.TDE_INSTALL;if(!ev)return;
+  $("instPop").hidden=true;
+  ev.prompt();
+  ev.userChoice.then(function(){window.TDE_INSTALL=null}).catch(function(){});
  };
- $("inst_x").onclick=function(){box.hidden=true;try{sessionStorage.setItem("tde_inst_ok","1")}catch(e){}};
- // Si el navegador no ofrece instalación automática, explica cómo hacerlo desde su menú
- setTimeout(function(){
-  if(deferred||standalone||ios||dismissed)return;
-  box.hidden=false;btn.hidden=true;
-  txt.textContent="Para instalar TDE MASTER: abrí el menú del navegador (⋮) y tocá “Instalar TDE MASTER” o “Crear acceso directo”.";
- },4000);
- if(ios){box.hidden=false;txt.textContent="En iPhone o iPad: tocá Compartir y luego “Agregar a pantalla de inicio”.";btn.hidden=true}
 });
 </script>
-<div id="inst" role="dialog" aria-label="Instalar acceso directo" hidden>
-<p id="inst_txt"></p>
-<button type="button" id="inst_btn" class="btn" hidden>Instalar acceso directo</button>
-<button type="button" id="inst_x" class="x" aria-label="Cerrar">✕</button>
+<div id="instPop" class="instPop" hidden role="dialog" aria-modal="true" aria-labelledby="instTit">
+<div class="instCard">
+<h3 id="instTit">Acceso directo</h3>
+<p id="instTxt"></p>
+<div class="instBtns"><button type="button" id="instSi" class="btn">Ejecutar</button><button type="button" id="instNo" class="btn sec">Ahora no</button></div>
+</div>
 </div>
 <script>
 /* ---- Pantalla de presentación y ACCESO CIFRADO: el ingreso se valida en la base (ingresar_usuario) ---- */
@@ -2007,7 +2009,7 @@ function enviarAcceso(){
       saveSess(null);accMsg("Perfil incorrecto para este usuario.",true);accSub("");ge("acPerfil").focus();return;
     }
     ge("acP").value="";accMsg("Ciberseguridad - CIA - Aprobada");accSub("");
-    setTimeout(function(){unlockApp();if(typeof paintKan==="function")try{paintKan()}catch(e){}},600);
+    setTimeout(function(){unlockApp();if(typeof paintKan==="function")try{paintKan()}catch(e){}mostrarAvisoInstalar()},600);
   }).catch(function(e){
     ACCG.busy=false;ge("acBtn").disabled=false;ge("acP").value="";
     if(e.code==="bloqueado"){accMsg("Ciberseguridad - CIA - NO Aprobada",true);accBloquear(e.segundos||100);return}
