@@ -1920,20 +1920,28 @@ buildPermChecks();
 
 // ---- Acceso directo (PWA): un toque lo descarga/instala ----
 if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
-// ---- Acceso directo: aviso flotante después del ingreso ----
-window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.TDE_INSTALL=e});
-window.addEventListener("appinstalled",function(){window.TDE_INSTALL=null});
+// ---- Acceso directo: aviso después de cada ingreso mientras la app no esté instalada ----
 function esAppInstalada(){return (window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true}
+function marcarInstalada(){try{localStorage.setItem("tde_instalada","1")}catch(e){}}
+function yaInstalada(){
+ if(esAppInstalada()){marcarInstalada();return true}
+ try{return localStorage.getItem("tde_instalada")==="1"}catch(e){return false}
+}
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();window.TDE_INSTALL=e});
+window.addEventListener("appinstalled",function(){window.TDE_INSTALL=null;marcarInstalada()});
 function mostrarAvisoInstalar(){
- if(esAppInstalada())return;
+ if(yaInstalada())return;
  var ios=/iPhone|iPad|iPod/.test(navigator.userAgent);
+ var txt=$("instTxt"),si=$("instSi");
+ si.hidden=true;
  if(ios){
-  $("instTxt").textContent="¿Desea crear un acceso directo en su dispositivo? Tocá Compartir y luego “Agregar a pantalla de inicio”.";
-  $("instSi").hidden=true;
+  txt.textContent="¿Desea crear un acceso directo en su dispositivo? Tocá Compartir y luego “Agregar a pantalla de inicio”.";
  }else if(window.TDE_INSTALL){
-  $("instTxt").textContent="¿Desea crear un acceso directo en su dispositivo?";
-  $("instSi").hidden=false;
- }else return;
+  txt.textContent="¿Desea crear un acceso directo en su dispositivo?";
+  si.hidden=false;
+ }else{
+  txt.textContent="¿Desea crear un acceso directo en su dispositivo? Abrí el menú del navegador (⋮) y tocá “Instalar TDE MASTER” o “Crear acceso directo”.";
+ }
  $("instPop").hidden=false;
 }
 document.addEventListener("DOMContentLoaded",function(){
@@ -1942,8 +1950,9 @@ document.addEventListener("DOMContentLoaded",function(){
   var ev=window.TDE_INSTALL;if(!ev)return;
   $("instPop").hidden=true;
   ev.prompt();
-  ev.userChoice.then(function(){window.TDE_INSTALL=null}).catch(function(){});
+  ev.userChoice.then(function(c){if(c&&c.outcome==="accepted")marcarInstalada();window.TDE_INSTALL=null}).catch(function(){});
  };
+ if(yaInstalada())return;
 });
 </script>
 <div id="instPop" class="instPop" hidden role="dialog" aria-modal="true" aria-labelledby="instTit">
