@@ -1921,14 +1921,14 @@ if("serviceWorker" in navigator){window.addEventListener("load",function(){navig
 document.addEventListener("DOMContentLoaded",function(){
  var box=$("inst"),txt=$("inst_txt"),btn=$("inst_btn"),deferred=null;
  var standalone=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||window.navigator.standalone===true;
- var dismissed=false;try{dismissed=localStorage.getItem("tde_inst_ok")==="1"}catch(e){}
+ var dismissed=false;try{dismissed=sessionStorage.getItem("tde_inst_ok")==="1"}catch(e){}
  if(standalone||dismissed)return;
  var ua=navigator.userAgent;
  var ios=/iPhone|iPad|iPod/.test(ua);
  // Solo instalación nativa del navegador (Chrome/Edge en Android y PC): crea el icono directamente
  window.addEventListener("beforeinstallprompt",function(e){
   e.preventDefault();deferred=e;
-  box.hidden=false;txt.textContent="Instalá el acceso directo de TDE Multisistema.";btn.hidden=false;
+  box.hidden=false;txt.textContent="Instalá el acceso directo de TDE MASTER.";btn.hidden=false;
  });
  window.addEventListener("appinstalled",function(){box.hidden=true;deferred=null});
  btn.onclick=function(){
@@ -1936,7 +1936,13 @@ document.addEventListener("DOMContentLoaded",function(){
   deferred.prompt();
   deferred.userChoice.then(function(){deferred=null;box.hidden=true}).catch(function(){});
  };
- $("inst_x").onclick=function(){box.hidden=true;try{localStorage.setItem("tde_inst_ok","1")}catch(e){}};
+ $("inst_x").onclick=function(){box.hidden=true;try{sessionStorage.setItem("tde_inst_ok","1")}catch(e){}};
+ // Si el navegador no ofrece instalación automática, explica cómo hacerlo desde su menú
+ setTimeout(function(){
+  if(deferred||standalone||ios||dismissed)return;
+  box.hidden=false;btn.hidden=true;
+  txt.textContent="Para instalar TDE MASTER: abrí el menú del navegador (⋮) y tocá “Instalar TDE MASTER” o “Crear acceso directo”.";
+ },4000);
  if(ios){box.hidden=false;txt.textContent="En iPhone o iPad: tocá Compartir y luego “Agregar a pantalla de inicio”.";btn.hidden=true}
 });
 </script>
